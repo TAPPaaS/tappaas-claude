@@ -1,0 +1,6 @@
+# Machine-local Claude Code state — never shared
+.DS_Store
+**/.claude/settings.local.json
+**/.claude/worktrees/
+**/.claude/scheduled_tasks.lock
+**/.claude/assistant-daemon-state.json
