@@ -1,7 +1,7 @@
 # tappaas-claude — Claude Code config for the TAPPaaS repos
 
 This repo holds the Claude Code configuration (`CLAUDE.md`, `.claude/agents`,
-`.claude/commands`, `.claude/skills`, `.claude/settings.json`) for the TAPPaaS Codeberg
+`.claude/commands`, `.claude/skills`, `.claude/settings.json`) for the TAPPaaS
 repositories. **It is deliberately kept OUT of those repos.**
 
 It lives on GitHub — **<https://github.com/TAPPaaS/tappaas-claude>** — shared among TAPPaaS
@@ -9,12 +9,16 @@ operators.
 
 ## Why
 
+We wnat to seperate recomendation for how to use AI to improve the TAPPaaS solution from the actual TAPPaaS source code
+
 The TAPPaaS repos live on [Codeberg](https://codeberg.org/TAPPaaS), a volunteer-run,
 donation-funded forge whose community discourages high-volume AI / "vibe-coded"
 contributions. To respect that, the AI tooling and its instruction files must not be
-committed to or pushed to Codeberg. They live here on GitHub instead (already the TAPPaaS
-mirror org, where AI tooling is tolerated) and are **symlinked** into each repo, so Claude
-Code still auto-discovers them locally while nothing reaches Codeberg.
+committed to or pushed to Codeberg. 
+
+They live here on GitHub instead (already the TAPPaaS
+mirror org) and are **symlinked** into each repo, so Claude
+Code still auto-discovers them locally while nothing reaches the TAPPaaS code repos.
 
 ## Layout
 
@@ -48,7 +52,7 @@ Machine-local, non-shared files stay **real** inside each repo and are untouched
 
 Git never sees the symlinks: each repo's `.git/info/exclude` (local, never pushed) ignores
 `CLAUDE.md` and `.claude/`, and the AI-tooling lines were removed from the tracked
-`.gitignore` files so Codeberg history stops naming them.
+`.gitignore` files so history stops naming them.
 
 ## Setup on a new machine
 
