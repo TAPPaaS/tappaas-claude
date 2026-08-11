@@ -1,8 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(*)",
-      "Bash(tea:*)",
+      "Bash",
       "WebFetch(domain:pbs.proxmox.com)",
       "WebFetch(domain:docs.opnsense.org)",
       "WebFetch(domain:grafana.com)"
