@@ -101,9 +101,18 @@ Implement on the machine you're running on (this Mac / dev machine).
 - Match the repo's existing density — no AI boilerplate, over-commenting, or redundant docs.
 - Use the shell-script skills (`bash-script-generator` / `bash-script-validator`) for any
   `.sh` work, and the agent team for non-trivial changes (see `CLAUDE.md` routing).
+- **Regression guard — carefully consider a `--deep` `test.sh` extension.** For any real
+  fix/feature, weigh adding a case that would have *caught this issue* to the module's `test.sh`,
+  behind the deep-test gate (`TAPPAAS_TEST_DEEP=1` / `--deep`, so it runs in the full regression
+  sweep, not every fast run). Prefer a coded test over manual verification (per `CLAUDE.md`
+  testing rules); if you decide against one, say why. Propose the test plan before running it.
 - **Test on a connected system if possible** — via the live env from Phase 3, run the module's
-  `test.sh` / `test-module.sh`, or a `nixos-rebuild test` (never `switch` for first activation).
-  Propose the test plan before running per the testing rules.
+  `test.sh` / `test-module.sh` (with `--deep` when you added a deep case), or a
+  `nixos-rebuild test` (never `switch` for first activation).
+- **Consider documentation.** Ask whether the change makes any `README.md`, `DESIGN.md`,
+  `INSTALL.md`, `DEVELOP.md`, ADR, or schema/field doc stale or incomplete — new flag, changed
+  behaviour, new field/value, moved file. Update the docs that genuinely drifted (match the
+  repo's density — no boilerplate), or note explicitly that none needed it.
 - **Never `git commit` or `git push`.** Stage the change in the working tree and stop.
 
 ## Phase 6 — Wrap up
