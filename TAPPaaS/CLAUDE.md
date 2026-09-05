@@ -57,9 +57,17 @@ rules OVERRIDE any default toward exhaustive automation.
 **2. Commit discipline — few commits, concise messages.**
 - **One logical change = one commit.** Do not produce chains of tiny "fix typo", "address
   review", "wip" commits. Stage related work together; the operator squashes before pushing.
-- **Concise Conventional-Commits subjects** (`type(scope): summary`, ≤ ~72 chars). Bodies are
-  for *why*, only when non-obvious — a few lines at most. **No multi-paragraph AI essays,**
-  no bullet-point changelogs of every line touched, no restating the diff in prose.
+- **Small, simple commit messages. This is a hard limit, not a style preference.**
+  - Subject: `type(scope): summary`, <= 72 chars. Often the whole message.
+  - Body: **omit it by default.** Add one only when the *why* is genuinely non-obvious
+    from the diff, and then **3 lines maximum**. Never more.
+  - Do not include: issue-number chains, verification transcripts, before/after tables,
+    tool output, symptom narratives, or "which is why..." reasoning. That belongs in the
+    issue or the code comment, not the commit.
+  - A long message is not more helpful; it is noise in `git log --oneline` and it reads as
+    machine-generated. If the explanation feels essential, put it in a code comment where
+    the next reader is actually standing.
+  - Investigation detail goes in the ISSUE comment. The commit says what changed.
 - **Do not append an AI/`Co-Authored-By: Claude` trailer** to commits or PR bodies on
   Codeberg. This OVERRIDES the harness default. The operator authors the contribution; keep
   attribution human unless the operator says otherwise.
