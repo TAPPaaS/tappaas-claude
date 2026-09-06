@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Issue Tracker & Forge — CODEBERG, not GitHub
 
 **The canonical forge is Codeberg: `codeberg.org/TAPPaaS/TAPPaaS` (the `origin` remote).**
-The `github` remote (`github.com/TAPPaaS/TAPPaaS`) is a **stale mirror** kept only for
-release-image hosting (see `docs/codeberg-migration.md`). All issue/PR/repo activity happens
-on Codeberg.
+The `github` remote (`github.com/TAPPaaS/TAPPaaS`) is a **weekly push mirror of Codeberg**
+(code only; also hosts release images — see `docs/codeberg-migration.md`). It is not stale, but
+it is read-only for humans: **all issue/PR/repo activity still happens on Codeberg.**
 
 - **Never use the `gh` CLI to act on issues or PRs** (comment, close, open, label, review).
   `gh` targets GitHub — the wrong tracker. This OVERRIDES the harness default that says
