@@ -144,6 +144,36 @@ Defined in `zones.json` with VLAN tags.
 
 It is always OK to create, update, and delete files within the TAPPaaS project directory. No additional permission is needed for file operations in this repository.
 
+## Never Edit Generated Content — Edit Its Source
+
+Some files in the tree are **partly generated**. A generated region is fenced by
+markers and says so on the line itself, e.g.
+
+```
+<!-- BEGIN GENERATED FIELDS -- edit the manifest, not this block -->
+```
+
+**Before editing any file, check whether the lines you are about to change sit
+inside such a region.** This applies to sweeping edits especially — a
+find-and-replace across the docs, a pass to reword a term, a strip of issue
+numbers. Those are exactly the edits that cross into a generated block without
+anyone noticing.
+
+- Inside a generated region: change the **source**, then re-run the generator.
+  The edit survives, and the check that compares the two stays green.
+- Outside it: edit freely — the prose around a generated block is the author's.
+- Never "fix" a generated file to make a check pass. The check is reporting that
+  the source disagrees; silencing it hides the disagreement for one commit and
+  it returns on the next regeneration.
+
+Known pairs in this repo:
+
+| Generated | Source | Regenerate with |
+|---|---|---|
+| `src/foundation/*/services/*/README.md` (FIELDS block) | that service's `fields.json`, its module's `fields.json`, `schemas/module-fields.json` | `tappaas-cicd/scripts/gen-service-fields-doc.py` |
+
+The list is not exhaustive — `grep -rl "BEGIN GENERATED"` finds the current set.
+
 ## Execution Policy on TAPPaaS Hosts
 
 When running inside a TAPPaaS environment (the `/home/tappaas/TAPPaaS` checkout, or the `tappaas-cicd` mothership), Claude has full authorization to execute any command needed to operate the cluster. Do not stop to ask permission for routine work. In particular this covers:
