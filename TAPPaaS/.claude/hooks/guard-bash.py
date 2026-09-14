@@ -12,6 +12,12 @@ do not depend on the model remembering them:
 
 Reads the hook payload on stdin and prints a permission decision on stdout.
 Python 3.9 compatible (macOS system python).
+
+  guard-bash.py                  project hook: every command is in scope
+  guard-bash.py --scope tappaas  user-level hook: git/gh rules apply only to repositories
+                                 with a TAPPaaS remote or a site's managed checkout, so a
+                                 session opened in any folder is still guarded; tea writes
+                                 (always Codeberg) ask everywhere
 """
 import json
 import os
@@ -21,6 +27,8 @@ import subprocess
 import sys
 
 MANAGED_CHECKOUT = os.environ.get("TAPPAAS_GUARD_MANAGED_CHECKOUT", "/home/tappaas/TAPPaaS")  # override: tests
+TAPPAAS_REMOTE = re.compile(r"(codeberg\.org|github\.com|forgejo\.makerfloss\.eu)[:/]TAPPaaS/")
+SCOPED = "--scope" in sys.argv[1:] and "tappaas" in sys.argv[1:]
 SEPARATORS = {";", "&&", "||", "|", "&", "(", ")", "|&", ";;"}
 PREFIX_WORDS = {"sudo", "command", "env", "nohup", "time", "exec", "builtin", "nice"}
 COMMITTING = {"commit", "merge", "rebase", "cherry-pick", "revert", "am", "tag"}
@@ -90,6 +98,18 @@ def base(word):
     return os.path.basename(word)
 
 
+def in_scope(where):
+    """Is `where` inside a TAPPaaS repository? Always true for the project hook."""
+    if not SCOPED:
+        return True
+    top = git(where, "rev-parse", "--show-toplevel")
+    if not top:
+        return False
+    if os.path.realpath(top) == os.path.realpath(MANAGED_CHECKOUT):
+        return True
+    return bool(TAPPAAS_REMOTE.search(git(where, "remote", "-v")))
+
+
 # --- rules -----------------------------------------------------------------------
 
 def check_git(tokens, cwd):
@@ -108,6 +128,8 @@ def check_git(tokens, cwd):
     if i >= len(tokens):
         return None, None
     sub, args = tokens[i], tokens[i + 1:]
+    if not in_scope(where):
+        return None, None
 
     if sub == "push":
         return "deny", "git push is the operator's step. Commit locally and report what is ready to push."
@@ -215,7 +237,8 @@ def decide(command, cwd):
         elif cmd == "git":
             decisions.append(check_git(seg, cwd))
         elif cmd == "gh":
-            decisions.append(check_gh(seg))
+            if in_scope(cwd):
+                decisions.append(check_gh(seg))
         elif cmd == "tea":
             decisions.append(check_tea(seg))
     for level in ("deny", "ask"):
@@ -225,8 +248,10 @@ def decide(command, cwd):
     return None, None
 
 
-def fallback(command):
+def fallback(command, cwd):
     """Used when the command cannot be tokenized (e.g. unbalanced quotes)."""
+    if not in_scope(cwd):
+        return None, None
     if re.search(r"\bgit\b[^;&|]*\bpush\b", command) or "--no-verify" in command:
         return "deny", "git push / --no-verify are not allowed (command could not be parsed exactly)."
     if re.search(r"\bgh\s+(issue|pr)\b", command):
@@ -246,7 +271,7 @@ def main():
     try:
         decision, reason = decide(command, cwd)
     except ValueError:
-        decision, reason = fallback(command)
+        decision, reason = fallback(command, cwd)
     if decision:
         print(json.dumps({"hookSpecificOutput": {
             "hookEventName": "PreToolUse",

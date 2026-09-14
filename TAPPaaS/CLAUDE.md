@@ -116,6 +116,11 @@ What enforces it (source in `~/src/tappaas-claude`, installed by `link.sh`):
 | `.claude/hooks/guard-bash.py` (PreToolUse, every Bash call) | `git push`, `--no-verify` / `commit -n`, `gh` beyond reads, commits in `/home/tappaas/TAPPaaS` | changes to `stable`, creating tags, rebasing/amending commits already on a remote, `reset --hard`, `clean -f`, `tea` writes |
 | `.git/hooks/commit-msg` | for your commits (`CLAUDECODE=1`): subject not `type(scope): summary` or over 72 chars, body over 3 lines; for everyone: Claude attribution lines | — |
 
+The guard is also registered in the operator's user settings in scoped mode
+(`guard-bash.py --scope tappaas`), so it acts on TAPPaaS repositories even in a session that
+was opened in another folder. If `git push --dry-run` in the checkout is *not* refused, the
+guard is not active: stop and tell the operator.
+
 A block or a question from a hook is the policy working, not an obstacle: do not look for a
 way around it; report and let the operator decide. Hook tests:
 `~/src/tappaas-claude/TAPPaaS/.claude/hooks/test-guard-bash.sh`.

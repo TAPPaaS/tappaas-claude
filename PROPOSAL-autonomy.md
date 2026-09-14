@@ -6,8 +6,9 @@
 applied 2026-09-14**: ssh aliases, `SITES.md`, `scripts/tappaas-test.sh`, `tappaas-test`
 skill, dev clone + linked config on hrossen (`~/dev`). **Step 3 (agents) applied 2026-09-14**:
 seven native `tappaas-*` subagents, `agents.md` routing, CLAUDE.md "Subagents"; the old
-`agent-*.md` templates were deleted after the #644 pilot session ended.
-Steps 4–5 not started.
+`agent-*.md` templates were deleted after the #644 pilot session ended. **Step 4 applied
+2026-09-14**: `tappaas-wave` skill (lessons from the #644 pilot) and the guard's `--scope
+tappaas` mode for the operator's user settings. Step 5 (staging) deferred.
 **Purpose:** let Claude implement the waves in
 `TAPPaaS/docs/design/release-2.1-implementation-plan.md` with far fewer stops,
 while Codeberg still only ever sees the operator.

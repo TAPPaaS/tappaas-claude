@@ -89,3 +89,20 @@ unauthenticated. `snapshots/` is gitignored.
 included) to `~/dev/scratch/<branch>` on the site's cicd and runs each target's `test.sh`
 there; `module:<name>` runs `test-module.sh` against the installed code. Sites and roles:
 `SITES.md`. The `tappaas-test` skill explains the full test ladder.
+
+## User-level guard
+
+The Bash guard (`TAPPaaS/.claude/hooks/guard-bash.py`) runs as a project hook, but only in
+sessions opened in the TAPPaaS checkout. To guard every session, however it was opened,
+register it once in `~/.claude/settings.json` in its scoped mode, where it acts only on
+repositories with a TAPPaaS remote (and `tea` writes). Paste in a terminal (adjust the path
+if the config repo lives elsewhere):
+
+```bash
+F=~/.claude/settings.json; cp "$F" "$F.bak-$(date +%Y%m%d-%H%M%S)" && jq --arg cmd "python3 $HOME/src/tappaas-claude/TAPPaaS/.claude/hooks/guard-bash.py --scope tappaas" '
+.hooks.PreToolUse = ((.hooks.PreToolUse // []) as $h
+  | if any($h[]?; any(.hooks[]?; .command == $cmd)) then $h
+    else $h + [{matcher: "Bash", hooks: [{type: "command", command: $cmd, timeout: 15}]}] end)' "$F" > "$F.new" && mv "$F.new" "$F" && echo "guard hook registered"
+```
+
+Claude cannot make this change itself: editing its own permission settings is blocked by design.

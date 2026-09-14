@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# The test commands are literal strings for the guard to parse, $(...) included.
+# shellcheck disable=SC2016
 #
 # test-guard-bash.sh — table test for guard-bash.py. Builds a throwaway repo with a
 # fake remote so branch-dependent rules (stable, pushed commits) are exercised.
@@ -14,9 +16,11 @@ trap 'rm -rf "${WORK}"' EXIT INT TERM
 
 pass=0; fail=0
 
-# decision_for <cwd> <command> — prints deny|ask|none
+# decision_for <cwd> <command> — prints deny|ask|none (GUARD_ARGS: e.g. "--scope tappaas")
+GUARD_ARGS=""
 decision_for() {
-    python3 - "$1" "$2" <<'PY' | TAPPAAS_GUARD_MANAGED_CHECKOUT="${WORK}/managed" python3 "${GUARD}" \
+    # shellcheck disable=SC2086  # GUARD_ARGS is intentionally word-split
+    python3 - "$1" "$2" <<'PY' | TAPPAAS_GUARD_MANAGED_CHECKOUT="${WORK}/managed" python3 "${GUARD}" ${GUARD_ARGS} \
         | python3 -c 'import json,sys; d=sys.stdin.read().strip(); print(json.loads(d)["hookSpecificOutput"]["permissionDecision"] if d else "none")'
 import json, sys
 print(json.dumps({"tool_name": "Bash", "cwd": sys.argv[1], "tool_input": {"command": sys.argv[2]}}))
@@ -50,6 +54,10 @@ S="${WORK}/stable-wt"
 g -C "${R}" worktree add "${S}" stable
 P="${WORK}/pushed-wt"
 g -C "${R}" worktree add "${P}" pushed
+T="${WORK}/tappaas"     # a clone that also has a TAPPaaS remote
+g clone "${WORK}/origin.git" "${T}" && g -C "${T}" remote add codeberg git@codeberg.org:TAPPaaS/TAPPaaS.git
+O="${WORK}/other"       # an unrelated project
+g init "${O}" && g -C "${O}" remote add origin https://github.com/someone/other.git
 
 # --- push / no-verify / managed checkout
 expect none "${R}" 'git status'
@@ -96,6 +104,22 @@ expect none "${R}" 'tea issues -R origin 376 --comments'
 expect ask  "${R}" 'tea comment -R origin 376 "$(cat body.md)"'
 expect ask  "${R}" 'cd /tmp && tea issues close -R origin 376'
 expect none "${R}" "ssh tappaas@host 'cd ~/TAPPaaS && git status'"
+
+# --- user-level hook (--scope tappaas): only TAPPaaS repositories are guarded
+expect deny "${O}" 'git push'                     # project hook: every repo in scope
+GUARD_ARGS="--scope tappaas"
+expect deny "${T}" 'git push origin main'
+expect deny "${T}" 'git commit -nm "fix: x"'
+expect none "${O}" 'git push origin main'
+expect none "${R}" 'git push'                     # remote is a local path, not TAPPaaS
+expect deny "${O}" "cd ${T} && git push"
+expect deny "${O}" "git -C ${T} push"
+expect deny "${WORK}/managed" 'git commit -m "fix: x"'
+expect deny "${T}" 'gh pr list'
+expect none "${O}" 'gh pr view 3'
+expect ask  /tmp   'tea comment -R origin 1 hi'
+expect none /tmp   'git status'
+GUARD_ARGS=""
 
 printf '%d passed, %d failed\n' "${pass}" "${fail}"
 [[ "${fail}" -eq 0 ]]
