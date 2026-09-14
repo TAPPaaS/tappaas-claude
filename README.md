@@ -26,8 +26,11 @@ Code still auto-discovers them locally while nothing reaches the TAPPaaS code re
 tappaas-claude/
 ├── README.md            ← this file
 ├── link.sh              ← (re)creates the symlinks in each repo
+├── SITES.md             ← test sites and their roles (addresses: SITES.local.md, gitignored)
+├── githooks/commit-msg  ← message rules for Claude's commits (installed by link.sh)
 ├── scripts/
-│   └── forge-snapshot.py ← low-load Codeberg backlog download (see below)
+│   ├── forge-snapshot.py ← low-load Codeberg backlog download (see below)
+│   └── tappaas-test.sh   ← run test suites on a site's cicd from the working tree
 ├── TAPPaaS/
 │   ├── CLAUDE.md
 │   └── .claude/{agents,commands,skills,settings.json}
@@ -79,3 +82,10 @@ scripts/forge-snapshot.py snapshots/backlog.json --milestones 134447 --add-miles
 
 It uses the repo-wide paginated endpoints at 50 items per page, one second apart,
 unauthenticated. `snapshots/` is gitignored.
+
+## Testing on a site
+
+`scripts/tappaas-test.sh <site> [--deep] <target>...` ships the working tree (unpushed work
+included) to `~/dev/scratch/<branch>` on the site's cicd and runs each target's `test.sh`
+there; `module:<name>` runs `test-module.sh` against the installed code. Sites and roles:
+`SITES.md`. The `tappaas-test` skill explains the full test ladder.

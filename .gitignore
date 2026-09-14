@@ -11,3 +11,6 @@ snapshots/
 # Site addresses and access paths (this repo is public) and drafted issue comments
 SITES.local.md
 outbox/
+
+# Test run logs from scripts/tappaas-test.sh
+logs/

@@ -124,7 +124,7 @@ way around it; report and let the operator decide. Hook tests:
 
 | Environment | Checkout | Notes |
 |-------------|----------|-------|
-| Claude Code app or VSCodium on the Mac | `~/src/TAPPaaS` (worktrees under `.claude/worktrees/`) | Reach sites over ssh; WireGuard via `~/bin/tappaas-wg.sh` |
+| Claude Code app or VSCodium on the Mac | `~/src/TAPPaaS` (worktrees under `.claude/worktrees/`) | Sites via ssh aliases `cicd-hrossen`, `cicd-makerfloss` (the latter needs `~/bin/tappaas-wg.sh makerfloss.eu`; no sudo) |
 | Remote VSCodium on a site's cicd | `~/dev/TAPPaaS` — **not** `/home/tappaas/TAPPaaS` | The local toolbox (`/home/tappaas/bin/*`) is that site's installed code |
 
 Sites (IP addresses and access paths: `~/src/tappaas-claude/SITES.local.md`, local only —
@@ -260,7 +260,7 @@ Use exactly **one** level of backgrounding so completion notifications actually 
 ## Testing Requirements
 
 1. **Create testable code** - Add or expand `test.sh` with test cases for new functionality
-2. **Run tests without asking** - fast tiers anywhere; deep tiers on the test site (hrossen.dk). Ask first only for a test that changes a live site beyond what "Where Am I — Sites" allows
+2. **Run tests without asking** - fast tiers anywhere; deep tiers on the test site (hrossen.dk). Ask first only for a test that changes a live site beyond what "Where Am I — Sites" allows. How: the `tappaas-test` skill and `~/src/tappaas-claude/scripts/tappaas-test.sh <site> <component-path|module:name>...` (ships the working tree to the site, unpushed work included)
 3. **Use coded tests** - Run tests via `test.sh` rather than ad-hoc manual testing
 
 ## Shell Script Standards

@@ -62,9 +62,9 @@ Try in this order; stop at the first that answers the question:
 
 2. **Otherwise reach a site from this dev machine.** Addresses and access paths are in
    `~/src/tappaas-claude/SITES.local.md` (local only). Try in order:
-   - **hrossen.dk** — the test site; its cicd is reachable over ssh without a tunnel.
-   - **makerfloss** — the canary; needs its WireGuard tunnel (`~/bin/tappaas-wg.sh makerfloss.eu`,
-     one tunnel at a time) and is **read-only** unless the operator asks.
+   - **hrossen.dk** — the test site: `ssh cicd-hrossen` (no tunnel needed).
+   - **makerfloss** — the canary: `~/bin/tappaas-wg.sh makerfloss.eu`, then `ssh cicd-makerfloss`;
+     **read-only** unless the operator asks.
    `tappaas-wg.sh status` first; `tappaas-wg.sh down` when finished if you brought one up.
 
 **Nested-ssh gotcha:** `ssh host 'ssh inner bash -lc "cmd --flag"'` silently drops `--flag`.
@@ -101,9 +101,10 @@ Implement on the machine you're running on (this Mac / dev machine).
   behind the deep-test gate (`TAPPAAS_TEST_DEEP=1` / `--deep`, so it runs in the full regression
   sweep, not every fast run). Prefer a coded test over manual verification (per `CLAUDE.md`
   testing rules); if you decide against one, say why. Propose the test plan before running it.
-- **Test on a connected system if possible** — via the live env from Phase 3, run the module's
-  `test.sh` / `test-module.sh` (with `--deep` when you added a deep case), or a
-  `nixos-rebuild test` (never `switch` for first activation).
+- **Test on a live system** — follow the `tappaas-test` skill:
+  `~/src/tappaas-claude/scripts/tappaas-test.sh hrossen [--deep] <component-path> module:<name>`
+  ships the working tree (unpushed work included) and runs the suites; `nixos-rebuild test`
+  (never `switch`) for a first activation.
 - **Consider documentation.** Ask whether the change makes any `README.md`, `DESIGN.md`,
   `INSTALL.md`, `DEVELOP.md`, ADR, or schema/field doc stale or incomplete — new flag, changed
   behaviour, new field/value, moved file. Update the docs that genuinely drifted (match the
