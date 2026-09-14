@@ -24,7 +24,3 @@ Typical combinations:
 Shell and Python conventions are in the `bash-script-*` skills and the code itself; project
 management is the built-in Plan agent. A `migration-author` agent follows once the migration
 framework (#652) exists.
-
-> The `agent-*.md` files next to this one are the old prompt templates (retired 2026-09-14,
-> stale paths). They stay only until sessions started before that date have finished, then
-> they are deleted. Do not use them.
