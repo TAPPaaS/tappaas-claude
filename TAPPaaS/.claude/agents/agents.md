@@ -1,87 +1,30 @@
-# TAPPaaS Agent Registry & Routing
+# TAPPaaS subagents
 
-## Routing Decision Tree
+Native Claude Code subagents (frontmatter in each `tappaas-*.md`). Call them by type with the
+Agent tool; there is no template to paste. Use one where it keeps long output or a second
+viewpoint out of the main session. Code is usually written in the main session.
 
-When a user request comes in, classify it and dispatch to the appropriate agent(s):
+| Agent | Use for | Model |
+|-------|---------|-------|
+| `tappaas-site-operator` | Commands on hrossen / makerfloss; returns a summary | sonnet |
+| `tappaas-upgrade-tester` | T3: a pushed branch through real updates on hrossen, then back to main | sonnet |
+| `tappaas-tester` | test.sh / test-service.sh / deep-tier regression cases, and running them | sonnet |
+| `tappaas-security` | Review of firewall, exposure, secrets, ssh, container changes (read-only) | session |
+| `tappaas-network` | Zones, rules, DNS, DHCP, Caddy, opnsense-controller, network-manager | session |
+| `tappaas-nix-dev` | NixOS modules and the shared baseline | session |
+| `tappaas-adr-reviewer` | ADR review, wave entry gates, amendment drafts | session |
 
-### Single-Agent Tasks
-```
-Bash script create/modify     -> bash-dev
-NixOS .nix create/modify      -> nix-dev
-Python code create/modify     -> python-dev
-TypeScript controller create/modify (ADR-007 P10; Nix-built, oracle-tested) -> typescript-dev
-Create/update tests           -> tester
-Security audit/review         -> security
-OPNsense/firewall planning    -> opnsense (for feature planning, debugging, zone/rule design)
-Network/infrastructure ops    -> infra (for Proxmox, Caddy setup, DNS/DHCP config)
-Architecture/design question  -> architect
-```
+Typical combinations:
+- **A fix:** main session implements → `tappaas-tester` adds the case that would have caught it →
+  `tappaas-security` if it touches exposure, secrets or ssh.
+- **A wave group:** `tappaas-adr-reviewer` checks the entry gate → main session implements →
+  `tappaas-upgrade-tester` proves it on hrossen.
+- **Live diagnosis:** `tappaas-site-operator` gathers evidence; the main session decides.
 
-### Multi-Agent Tasks
-```
-New module deployment:
-  1. architect   (design JSON config, zone, resources)
-  2. nix-dev     (create .nix file — uses architect output)
-  3. bash-dev    (create install.sh + update.sh — parallel with nix-dev)
-  4. infra       (Caddy handler, firewall rules, DNS)
-  5. tester      (create test.sh)
-  6. security    (review ALL outputs)
+Shell and Python conventions are in the `bash-script-*` skills and the code itself; project
+management is the built-in Plan agent. A `migration-author` agent follows once the migration
+framework (#652) exists.
 
-Module with web interface + SSO:
-  Same as above, plus:
-  - infra adds Caddy reverse proxy handler
-  - architect includes Authentik integration in design
-  - nix-dev configures forward-auth or OIDC client
-
-Bug investigation:
-  1. Route to relevant specialist (bash-dev/nix-dev/python-dev/infra/opnsense)
-  2. tester creates regression test after fix
-
-Firewall/zone feature planning:
-  1. opnsense    (design zones, rules, pinholes, plan CLI changes)
-  2. python-dev  (implement opnsense-controller changes if needed)
-  3. tester      (update test.sh with new test cases)
-  4. security    (review firewall rule changes)
-
-Foundation change:
-  1. architect   (assess impact on dependency chain)
-  2. Relevant specialist (bash-dev/nix-dev/python-dev)
-  3. security    (review)
-  4. tester      (regression tests)
-```
-
-### Escalation to pm
-Use the `pm` agent when:
-- Task involves 3+ agents
-- Task has complex dependencies between phases
-- User request is vague and needs decomposition
-- Risk assessment needed before implementation
-
-## Multi-Agent Context Passing Protocol
-
-When dispatching sequential agents, pass prior outputs as context:
-1. Include the previous agent's output in the next agent's prompt
-2. Clearly label what was produced by which agent
-3. For parallel agents (e.g., nix-dev + bash-dev), share the architect's output with both
-
-## Agent File Reference
-Each agent's full definition and prompt template is in:
-- `agent-pm.md`, `agent-architect.md`, `agent-bash-dev.md`
-- `agent-python-dev.md`, `agent-nix-dev.md`, `agent-tester.md`
-- `agent-security.md`, `agent-infra.md`, `agent-opnsense.md`
-
-## Invoking Agents
-
-Use Claude Code's Task tool with `subagent_type="general-purpose"` and include:
-1. The agent's prompt template from its definition file
-2. The specific task description
-3. Context from prior agents (if multi-agent workflow)
-4. Relevant file paths the agent should read
-
-Example:
-```
-Task tool call:
-  description: "nix-dev: Create nextcloud.nix"
-  subagent_type: "general-purpose"
-  prompt: [agent prompt template] + [architect's JSON design] + [specific task]
-```
+> The `agent-*.md` files next to this one are the old prompt templates (retired 2026-09-14,
+> stale paths). They stay only until sessions started before that date have finished, then
+> they are deleted. Do not use them.

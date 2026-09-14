@@ -4,7 +4,10 @@
 2026-09-14**: guard hook, commit-msg hook, settings, CLAUDE.md git/forge/sites sections,
 `SITES.local.md`. Also `tea` added to `tappaas-cicd.nix`. **Step 2 (reach and tests)
 applied 2026-09-14**: ssh aliases, `SITES.md`, `scripts/tappaas-test.sh`, `tappaas-test`
-skill, dev clone + linked config on hrossen (`~/dev`). Steps 3–5 not started.
+skill, dev clone + linked config on hrossen (`~/dev`). **Step 3 (agents) applied 2026-09-14**:
+seven native `tappaas-*` subagents, `agents.md` routing, CLAUDE.md "Subagents"; the old
+`agent-*.md` templates are kept until sessions started before that date end, then deleted.
+Steps 4–5 not started.
 **Purpose:** let Claude implement the waves in
 `TAPPaaS/docs/design/release-2.1-implementation-plan.md` with far fewer stops,
 while Codeberg still only ever sees the operator.
