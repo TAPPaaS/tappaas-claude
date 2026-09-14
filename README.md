@@ -26,6 +26,8 @@ Code still auto-discovers them locally while nothing reaches the TAPPaaS code re
 tappaas-claude/
 ├── README.md            ← this file
 ├── link.sh              ← (re)creates the symlinks in each repo
+├── scripts/
+│   └── forge-snapshot.py ← low-load Codeberg backlog download (see below)
 ├── TAPPaaS/
 │   ├── CLAUDE.md
 │   └── .claude/{agents,commands,skills,settings.json}
@@ -64,3 +66,16 @@ cd ~/src/tappaas-claude
 
 `link.sh` is idempotent — safe to re-run. It assumes the TAPPaaS repos are checked out as
 siblings under `~/src/` (pass `--repos-root DIR` if they live elsewhere).
+
+## Backlog snapshots (low forge load)
+
+For backlog analysis, download once and work offline instead of fetching issues one by one:
+
+```bash
+scripts/forge-snapshot.py snapshots/backlog.json                      # 2.0 + 2.1 open issues + all comments (~18 requests)
+scripts/forge-snapshot.py snapshots/backlog.json                      # re-run: only changes since last run (1-2 requests)
+scripts/forge-snapshot.py snapshots/backlog.json --milestones 134447 --add-milestone   # add Future Work (1 request)
+```
+
+It uses the repo-wide paginated endpoints at 50 items per page, one second apart,
+unauthenticated. `snapshots/` is gitignored.

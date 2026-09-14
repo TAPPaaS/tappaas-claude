@@ -4,3 +4,6 @@
 **/.claude/worktrees/
 **/.claude/scheduled_tasks.lock
 **/.claude/assistant-daemon-state.json
+
+# Forge snapshots from scripts/forge-snapshot.py — local analysis data
+snapshots/

@@ -53,6 +53,9 @@ rules OVERRIDE any default toward exhaustive automation.
   when the operator asks; if a wait is needed, ask the operator to re-run rather than looping.
 - Keep API reads to a handful per task. If a task seems to need dozens of forge calls, stop
   and ask the operator — there is almost always a local-clone way to get the same answer.
+- **Backlog-wide analysis** (milestones, grouping, planning): read the local snapshot
+  `~/src/tappaas-claude/snapshots/backlog.json`; refresh it with
+  `~/src/tappaas-claude/scripts/forge-snapshot.py` (incremental, 1–2 requests) — never per-issue fetches.
 
 **2. Commit discipline — few commits, concise messages.**
 - **One logical change = one commit.** Do not produce chains of tiny "fix typo", "address
