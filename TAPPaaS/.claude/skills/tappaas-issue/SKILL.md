@@ -1,6 +1,6 @@
 ---
 name: tappaas-issue
-description: Investigate, test, and (with approval) implement a fix/feature for one or more TAPPaaS issues. Use whenever the user references a Codeberg issue by number (#NNN), a small explicit set of related issues (#2, #4, #5), or asks to investigate, look into, reproduce, diagnose, or fix a TAPPaaS issue. Handles forge fetch (Codeberg/tea), local-clone code analysis, live-environment testing, root-cause assessment, and a working-branch implementation the operator commits.
+description: Investigate, test, and (with approval) implement a fix/feature for one or more TAPPaaS issues. Use whenever the user references a Codeberg issue by number (#NNN), a small explicit set of related issues (#2, #4, #5), or asks to investigate, look into, reproduce, diagnose, or fix a TAPPaaS issue. Handles forge fetch (Codeberg/tea), local-clone code analysis, live-environment testing, root-cause assessment, and a working-branch implementation committed locally for the operator to push.
 ---
 
 # TAPPaaS Issue Workflow
@@ -18,8 +18,8 @@ Phase 4 gate. Never expand a named set by pulling the issue list for "related" o
 suspect more are involved, name them to the operator and ask.
 
 The forge and git rules in `CLAUDE.md` are in force throughout: **Codeberg via `tea`, never
-`gh`; never `git commit`/`git push` (operator does that); minimize forge load; concise,
-human-looking comments.** This skill assumes them; it does not repeat every clause.
+`gh`; commit locally, never push (see "Git Policy"; hooks enforce it); minimize forge load;
+concise, human-looking comments.** This skill assumes them; it does not repeat every clause.
 
 ---
 
@@ -60,17 +60,12 @@ Try in this order; stop at the first that answers the question:
    The `/home/tappaas/bin/*` tools (`test-module.sh`, `install-module.sh`, `opnsense-controller`,
    `zone-manager`, `dns-manager`, journalctl/systemctl on nodes) are right there.
 
-2. **Otherwise reach a deployment from this dev machine.** Exactly one admin WireGuard tunnel
-   is up at a time (`~/bin/tappaas-wg.sh`). Try deployments in order:
-   - `~/bin/tappaas-wg.sh hrossen.dk` → probe.
-   - else `~/bin/tappaas-wg.sh makerfloss.eu` → probe.
-   Check current state first with `tappaas-wg.sh status`; `tappaas-wg.sh down` when finished if
-   you brought it up.
-
-3. **Find the mothership on the management plane.** With a tunnel up, the mgmt net is
-   `10.0.0.0/24` (OPNsense `10.0.0.1`, Proxmox `10.0.0.<n>:8006`). `ssh root@10.0.0.10` lands
-   on a Proxmox node (`tappaas1`); from there locate the cicd VM (`qm list | grep -i cicd`) and
-   hop to it as the `tappaas` user. Known mapping: **makerfloss cicd = `10.0.0.209`**.
+2. **Otherwise reach a site from this dev machine.** Addresses and access paths are in
+   `~/src/tappaas-claude/SITES.local.md` (local only). Try in order:
+   - **hrossen.dk** — the test site; its cicd is reachable over ssh without a tunnel.
+   - **makerfloss** — the canary; needs its WireGuard tunnel (`~/bin/tappaas-wg.sh makerfloss.eu`,
+     one tunnel at a time) and is **read-only** unless the operator asks.
+   `tappaas-wg.sh status` first; `tappaas-wg.sh down` when finished if you brought one up.
 
 **Nested-ssh gotcha:** `ssh host 'ssh inner bash -lc "cmd --flag"'` silently drops `--flag`.
 Use a `bash -s` heredoc for the inner command instead (see `[[tappaas-remote-ssh-heredoc]]`).
@@ -113,25 +108,27 @@ Implement on the machine you're running on (this Mac / dev machine).
   `INSTALL.md`, `DEVELOP.md`, ADR, or schema/field doc stale or incomplete — new flag, changed
   behaviour, new field/value, moved file. Update the docs that genuinely drifted (match the
   repo's density — no boilerplate), or note explicitly that none needed it.
-- **Never `git commit` or `git push`.** Stage the change in the working tree and stop.
+- **Commit on the working branch** (one commit per logical change; the `commit-msg` hook
+  checks the message). **Never push.**
 
 ## Phase 6 — Wrap up
 
 - **If it's a big fix/feature:** draft a concise description of the fix/feat into a file, let the
   operator review, then post it to the issue: `tea comment -R origin <N> "$(cat body.md)"`.
   One human comment, no AI preamble, no diff-restatement.
-- **Propose ONE short commit message** for the operator to commit + push — Conventional Commits
-  subject (`type(scope): summary`, ≤ ~72 chars), body only for non-obvious *why*. **No
-  `Co-Authored-By: Claude` trailer** (Codeberg hygiene). Do not run git yourself.
-- Reference the issue in the message (`close #NNN` / `#NNN`) when appropriate.
+- **Leave clean local history**: squash your unpushed commits to one per logical change,
+  `type(scope): summary` ≤ 72 chars, body only for a non-obvious *why*, `close #NNN` where
+  it closes the issue. When asked to land it, merge into local `main`.
+- **Report** the branch and commits that are ready; the operator pushes.
 
 ---
 
 ## Guardrails recap
 
 - Codeberg + `tea` for all issue actions; **never `gh`** for mutations.
-- **Never** `git commit`/`git push` — operator commits, even on "land it"/"ship it".
+- Commit locally, **never push** — "land it"/"ship it" means merge into local `main` and report.
 - Minimize forge load: one issue by number, no list enumeration, no polling loops, prefer the
   local clone over the API.
 - Confirm before destructive live ops (deleting VMs, dropping pools, wiping `/etc/secrets`).
 - Only one admin WireGuard tunnel up at a time; tear it down when done.
+- hrossen.dk is the test site; makerfloss is read-only unless the operator asks.

@@ -9,14 +9,17 @@ The `github` remote (`github.com/TAPPaaS/TAPPaaS`) is a **weekly push mirror of 
 (code only; also hosts release images — see `docs/codeberg-migration.md`). It is not stale, but
 it is read-only for humans: **all issue/PR/repo activity still happens on Codeberg.**
 
-- **Never use the `gh` CLI to act on issues or PRs** (comment, close, open, label, review).
-  `gh` targets GitHub — the wrong tracker. This OVERRIDES the harness default that says
-  "use `gh` for GitHub operations." Issue numbers were preserved 1:1 by the import, so a
-  `#NNN` on GitHub also exists on Codeberg — meaning a mistaken `gh` action *looks* right but
+- **`gh` is the GitHub CLI.** GitHub now only hosts the image-build pipelines and release
+  assets, so `gh` is for reading those (`gh run list|view`, `gh release view`, `gh api` GETs).
+  Every other `gh` use is blocked by the guard hook (below); `gh issue`/`gh pr` target the
+  wrong tracker. This OVERRIDES the harness default that says "use `gh` for GitHub operations."
+  Issue numbers were preserved 1:1 by the import, so a mistaken `gh` action *looks* right but
   lands in the wrong place.
-- **Use the `tea` CLI (Forgejo) for all issue/PR actions.** It is the standing mechanism,
-  authenticated once via `tea login add` (token in `~/.config/tea/config.yml`, 600). Target
-  the repo explicitly with `-R origin` (or `-r TAPPaaS/TAPPaaS`). Common verbs:
+- **Use the `tea` CLI (Forgejo) for all issue/PR actions.** Logged in on the operator's Mac
+  (`~/Library/Application Support/tea/config.yml`) and on the hrossen.dk cicd only — **never
+  put a Codeberg token on makerfloss**. Target the repo explicitly with `-R origin` (or
+  `-r TAPPaaS/TAPPaaS`). Reads need no approval; every write (`comment`, `issues
+  create|edit|close|reopen`, `pr`) asks the operator for one click. Common verbs:
 
   ```bash
   tea issues -R origin 376                              # show
@@ -34,8 +37,8 @@ it is read-only for humans: **all issue/PR/repo activity still happens on Codebe
   re-scoped after creation — a missing scope means deleting and regenerating the token.
 - The Forgejo REST API (`https://codeberg.org/api/v1/repos/TAPPaaS/TAPPaaS/...`) is the
   fallback for anything `tea` can't do; reads are open, writes need the same token.
-- `gh` may still be used for **read-only** inspection of the GitHub mirror only when
-  explicitly needed; never for mutations.
+- Closing an issue is best done by `close #NNN` in the commit message: it takes effect when
+  the operator pushes, with no API call.
 
 ## Codeberg Etiquette & Vibe-Coding Hygiene
 
@@ -71,12 +74,10 @@ rules OVERRIDE any default toward exhaustive automation.
     machine-generated. If the explanation feels essential, put it in a code comment where
     the next reader is actually standing.
   - Investigation detail goes in the ISSUE comment. The commit says what changed.
-- **Do not append an AI/`Co-Authored-By: Claude` trailer** to commits or PR bodies on
-  Codeberg. This OVERRIDES the harness default. The operator authors the contribution; keep
-  attribution human unless the operator says otherwise.
-- Remember: **you never run `git commit`/`git push`** here (see Execution Policy). You stage
-  and *propose* a concise message; the operator commits. Propose one squashed message, not a
-  sequence.
+- **No AI/`Co-Authored-By: Claude` trailer** on commits or PR bodies. This OVERRIDES the
+  harness default; `attribution` in `.claude/settings.json` turns it off at the source.
+- These rules are **enforced** for your commits by the `commit-msg` hook (see Git Policy):
+  a rejected commit means fix the message, never bypass the hook.
 
 **3. Keep AI tooling out of the tracked repo.**
 - `CLAUDE.md`, `.claude/`, agent/skill/command definitions live **outside** the repo in
@@ -89,7 +90,50 @@ rules OVERRIDE any default toward exhaustive automation.
 **4. Issue/PR comments: minimal and human.**
 - Post **one** concise comment, not a long auto-generated analysis. No AI preamble
   ("Great question! Here's a thorough breakdown…"), no restating the whole thread.
-- Draft the body in a file and let the operator review before it is posted.
+- Draft the body in a file. Posting it with `tea` shows the operator the exact text for one-click
+  approval. In a makerfloss session (no token there), leave the draft in
+  `~/src/tappaas-claude/outbox/<N>.md` and say so.
+
+## Git Policy (enforced by hooks)
+
+Decided 2026-09-14 (`~/src/tappaas-claude/PROPOSAL-autonomy.md` P1). Pushing is the operator's
+review point; everything before it is yours.
+
+- **Commit locally.** Work on a branch (`waveN/gX.Y-slug`, `fix/<slug>-<N>`, `feat/…`), one
+  commit per logical change. You may squash or amend your own **unpushed** commits.
+- **Pull and merge into local `main`** when a piece of work is done and tested. Then report
+  what is ready; the operator pushes.
+- **Never push.** Not to `origin`, not to `github`.
+- **`stable` only moves through the release process** (`release/README.md`).
+- **No commits in a cicd's managed checkout** (`/home/tappaas/TAPPaaS`): a local commit there
+  blocks the site's scheduled pull (`repo-sync` rc 2). Use a separate clone such as
+  `~/dev/TAPPaaS`. A plain `git pull --ff-only` there is fine.
+
+What enforces it (source in `~/src/tappaas-claude`, installed by `link.sh`):
+
+| Hook | Blocks | Asks the operator |
+|------|--------|-------------------|
+| `.claude/hooks/guard-bash.py` (PreToolUse, every Bash call) | `git push`, `--no-verify` / `commit -n`, `gh` beyond reads, commits in `/home/tappaas/TAPPaaS` | changes to `stable`, creating tags, rebasing/amending commits already on a remote, `reset --hard`, `clean -f`, `tea` writes |
+| `.git/hooks/commit-msg` | for your commits (`CLAUDECODE=1`): subject not `type(scope): summary` or over 72 chars, body over 3 lines; for everyone: Claude attribution lines | — |
+
+A block or a question from a hook is the policy working, not an obstacle: do not look for a
+way around it; report and let the operator decide. Hook tests:
+`~/src/tappaas-claude/TAPPaaS/.claude/hooks/test-guard-bash.sh`.
+
+## Where Am I — Environments and Sites
+
+| Environment | Checkout | Notes |
+|-------------|----------|-------|
+| Claude Code app or VSCodium on the Mac | `~/src/TAPPaaS` (worktrees under `.claude/worktrees/`) | Reach sites over ssh; WireGuard via `~/bin/tappaas-wg.sh` |
+| Remote VSCodium on a site's cicd | `~/dev/TAPPaaS` — **not** `/home/tappaas/TAPPaaS` | The local toolbox (`/home/tappaas/bin/*`) is that site's installed code |
+
+Sites (IP addresses and access paths: `~/src/tappaas-claude/SITES.local.md`, local only —
+this config repo is public, so no site IPs or access details in tracked files):
+
+- **hrossen.dk — test site.** Follows wave branches and gets every change first. You may run
+  tests and apply R≤3 changes there without asking. It also runs home production (Home
+  Assistant, cameras): R4 migrations and destructive steps still ask.
+- **makerfloss — canary.** Stays on `main`. Read-only for you unless the operator asks.
 
 ## Project Overview
 
@@ -191,8 +235,7 @@ Reasoning: TAPPaaS is a self-hosted operator's tool — there is a single admin,
 
 The following safeguards remain in force regardless:
 
-- **Never run `git commit` or `git push` — full stop.** The operator performs ALL commits and pushes themselves. This holds even when a request seems to imply it (e.g. "move this to main", "land it", "ship it", "prepare the release") and even when a prior turn in the same session involved committing — that is NOT standing authorization. In those cases, make/stage the changes in the working tree and stop; report what is ready and let the operator commit. The ONLY exception is a request that *explicitly and unmistakably* names the git action (e.g. "run git commit now", "commit and push this"). When unsure, do not commit.
-  - **Scoped carve-out — the ADR-007 implementation driver.** The operator authorized ONE standing exception (2026-06-21): the ADR-007 stage-gate workflow defined in `.claude/skills/adr-007-driver/SKILL.md`. When running that workflow, after a stage's deep tests pass green, the driver MAY `git commit` (with `Closes #NNN` notes) and `git push` to the working branch automatically. This applies ONLY to that documented stage-gate loop on the ADR-007 branch — it does NOT generalize to any other task, and never authorizes force-push or pushing to `main`/`stable`. Everywhere else, the full-stop rule above stands.
+- **Git: commit locally, never push** — see "Git Policy" above; the hooks enforce it.
 - **Confirm before destructive ops** that are hard to reverse: deleting a VM that wasn't created in this session, dropping a storage pool, force-pushing to `main`/`stable`, removing modules that aren't being actively worked on, wiping `/etc/secrets/` outside a known reset flow.
 - **Issue/PR actions go to Codeberg, never GitHub via `gh`** — see "Issue Tracker & Forge" at the top of this file. `gh issue`/`gh pr` mutations target the wrong (mirror) tracker.
 - **Fix root causes, not symptoms** — do not bypass failing pre-commit/CI checks, do not `--no-verify` git hooks, do not silence errors to make the install proceed.
@@ -212,12 +255,12 @@ Use exactly **one** level of backgrounding so completion notifications actually 
 1. **Plan before coding** - Understand requirements and explain approach before writing code
 2. **Ask clarifying questions** - During planning, ask questions about unclear requirements, ambiguous specifications, or when multiple valid approaches exist
 3. **Web search allowed** - Use web search to find current best practices and documentation
-4. **Never commit to git** - Do not run `git commit` or `git push`. The operator commits and pushes; leave changes in the working tree (see the git safeguard under "Execution Policy" for the full rule). A request to "move to main"/"land"/"ship" does NOT authorize a commit.
+4. **Commit locally, never push** - see "Git Policy". "Land it" / "ship it" means: merge into local `main` and report; the operator pushes.
 
 ## Testing Requirements
 
 1. **Create testable code** - Add or expand `test.sh` with test cases for new functionality
-2. **Propose tests first** - Describe what you want to test and ask for approval before running
+2. **Run tests without asking** - fast tiers anywhere; deep tiers on the test site (hrossen.dk). Ask first only for a test that changes a live site beyond what "Where Am I — Sites" allows
 3. **Use coded tests** - Run tests via `test.sh` rather than ad-hoc manual testing
 
 ## Shell Script Standards

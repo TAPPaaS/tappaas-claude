@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # link.sh — (re)create the symlinks that wire this private Claude config into the
-# TAPPaaS Codeberg repos, and ensure git never tracks them. Idempotent.
+# TAPPaaS Codeberg repos, install the commit-msg hook, and ensure git never
+# tracks any of it. Idempotent.
 #
 # Usage: ./link.sh [--repos-root DIR] [--dry-run] [-h|--help]
 #   --repos-root DIR  Parent dir holding the repo checkouts (default: this dir's parent)
@@ -24,7 +25,7 @@ DRY_RUN=0
 # Per-repo link map: "<repo>|<relative-path-in-repo>[|<relative-path-in-repo>...]"
 # The source is always $SELF_DIR/<repo>/<relative-path>.
 LINKS=(
-  "TAPPaaS|CLAUDE.md|.claude/agents|.claude/commands|.claude/skills|.claude/settings.json"
+  "TAPPaaS|CLAUDE.md|.claude/agents|.claude/commands|.claude/skills|.claude/hooks|.claude/settings.json"
   "Documentation|CLAUDE.md|.claude/agents|.claude/commands"
 )
 
@@ -66,6 +67,17 @@ link_repo() {
     run ln -s "$src" "$dst"
     log "  linked $rel -> $src"
   done
+
+  # commit-msg hook (githooks/commit-msg): link it unless a foreign hook is there.
+  local hook_src="$SELF_DIR/githooks/commit-msg" hook_dst="$repo_dir/.git/hooks/commit-msg"
+  if [[ -d "$repo_dir/.git/hooks" && -f "$hook_src" ]]; then
+    if [[ -L "$hook_dst" || ! -e "$hook_dst" ]]; then
+      run ln -sfn "$hook_src" "$hook_dst"
+      log "  linked .git/hooks/commit-msg -> $hook_src"
+    else
+      warn "  existing commit-msg hook, NOT overwriting: $hook_dst"
+    fi
+  fi
 
   # Keep git from ever tracking the linked paths (local, never-pushed exclude).
   local excl="$repo_dir/.git/info/exclude"

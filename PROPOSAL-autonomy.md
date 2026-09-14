@@ -1,7 +1,8 @@
 # Proposal — more autonomy for Claude on TAPPaaS, inside the Codeberg boundary
 
-**Status:** proposal, revised after operator review 2026-09-14. Nothing below is
-applied yet, except `tea` added to `tappaas-cicd.nix`.
+**Status:** revised after operator review 2026-09-14. **Step 1 (guardrails) applied
+2026-09-14**: guard hook, commit-msg hook, settings, CLAUDE.md git/forge/sites sections,
+`SITES.local.md`. Also `tea` added to `tappaas-cicd.nix`. Steps 2–5 not started.
 **Purpose:** let Claude implement the waves in
 `TAPPaaS/docs/design/release-2.1-implementation-plan.md` with far fewer stops,
 while Codeberg still only ever sees the operator.

@@ -2,9 +2,47 @@
   "permissions": {
     "allow": [
       "Bash",
+      "WebSearch",
       "WebFetch(domain:pbs.proxmox.com)",
       "WebFetch(domain:docs.opnsense.org)",
-      "WebFetch(domain:grafana.com)"
+      "WebFetch(domain:grafana.com)",
+      "WebFetch(domain:wiki.nixos.org)",
+      "WebFetch(domain:search.nixos.org)",
+      "WebFetch(domain:nix-community.github.io)",
+      "WebFetch(domain:discourse.nixos.org)",
+      "WebFetch(domain:forum.proxmox.com)"
+    ],
+    "ask": [
+      "Bash(tea comment *)",
+      "Bash(tea issues create *)",
+      "Bash(tea issues edit *)",
+      "Bash(tea issues close *)",
+      "Bash(tea issues reopen *)",
+      "Bash(tea pr *)",
+      "Bash(tea pulls *)"
+    ],
+    "deny": [
+      "Bash(git push *)",
+      "Bash(gh issue *)",
+      "Bash(gh pr *)"
+    ]
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.py\"",
+            "timeout": 15
+          }
+        ]
+      }
     ]
   }
 }
