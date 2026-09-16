@@ -107,10 +107,17 @@ Implement on the machine you're running on (this Mac / dev machine).
   `~/src/tappaas-claude/scripts/tappaas-test.sh hrossen [--deep] <component-path> module:<name>`
   ships the working tree (unpushed work included) and runs the suites; `nixos-rebuild test`
   (never `switch`) for a first activation.
-- **Consider documentation.** Ask whether the change makes any `README.md`, `DESIGN.md`,
-  `INSTALL.md`, `DEVELOP.md`, ADR, or schema/field doc stale or incomplete — new flag, changed
-  behaviour, new field/value, moved file. Update the docs that genuinely drifted (match the
-  repo's density — no boilerplate), or note explicitly that none needed it.
+- **Docs, in the same commit as the change** — part of the fix, not a sweep afterwards.
+  Before committing, grep the tree for what the change made false and fix it: the flag or verb
+  you renamed or added, the mechanism you replaced, the check whose verdict changed, the field
+  you added to an artefact. Audiences per ADR-013 §4 — `README.md` what/why, `INSTALL.md` only
+  what automation cannot do, `DESIGN.md` internals, `TEST.md` what the suite asserts; a
+  manager's own `README`/`DESIGN` and its `CLI-REFERENCE` carry its verbs and options; a
+  schema/field note feeds generated blocks, so edit the source and regenerate. Runbooks under
+  `docs/design/` tell an operator to run something: a command that no longer exists there is a
+  defect, not staleness. Leave historical trackers alone. **A doc that would send an operator to
+  the wrong command blocks the commit** the way a failing test does; cosmetic wording can wait.
+  Match the repo's density — no boilerplate. If nothing needed changing, say so explicitly.
 - **Commit on the working branch** (one commit per logical change; the `commit-msg` hook
   checks the message). **Never push.**
 
@@ -122,7 +129,8 @@ Implement on the machine you're running on (this Mac / dev machine).
 - **Leave clean local history**: squash your unpushed commits to one per logical change,
   `type(scope): summary` ≤ 72 chars, body only for a non-obvious *why*, `close #NNN` where
   it closes the issue. When asked to land it, merge into local `main`.
-- **Report** the branch and commits that are ready; the operator pushes.
+- **Report** the branch and commits that are ready, and the **docs touched (or "none needed",
+  said explicitly)**; the operator pushes.
 
 ---
 
