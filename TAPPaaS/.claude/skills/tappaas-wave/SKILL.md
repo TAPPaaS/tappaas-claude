@@ -49,9 +49,20 @@ For each issue in the group table:
    fix. `tappaas-security` reviews anything touching exposure, secrets, ssh or firewall rules
    (mandatory in Wave 2). `tappaas-network` / `tappaas-nix-dev` for their domains.
 5. **Test** to the issue's level (§10.1): T0–T2 with `tappaas-test.sh hrossen …`.
-6. **Related bugs found on the way:** same area and risk class → fix on this branch as a
+6. **Docs, in the same commit as the change** — part of the fix, not a sweep afterwards.
+   Before committing, grep the tree for what the change made false and fix it: the flag or
+   verb you renamed or added, the mechanism you replaced, the check whose verdict changed,
+   the field you added to an artefact. Audiences per ADR-013 §4 — `README.md` what/why,
+   `INSTALL.md` only what automation cannot do, `DESIGN.md` internals, `TEST.md` what the
+   suite asserts; a manager's own `README`/`DESIGN` and the `CLI-REFERENCE` carry its verbs
+   and options. Runbooks under `docs/design/` tell an operator to run something: a command
+   that no longer exists there is a defect, not staleness. Leave historical trackers alone.
+   **A doc that would send an operator to the wrong command blocks the commit** the way a
+   failing test does; cosmetic wording can wait. Never edit inside a `BEGIN GENERATED`
+   block — change its source and regenerate.
+7. **Related bugs found on the way:** same area and risk class → fix on this branch as a
    separate commit and say so; anything else → queue it as a task (spawn_task) and list it.
-7. Draft one short comment per issue in `~/src/tappaas-claude/outbox/<N>.md` (what changed, how
+8. Draft one short comment per issue in `~/src/tappaas-claude/outbox/<N>.md` (what changed, how
    it was tested — no preamble).
 
 **Data-safety fast lane** (§10.2 rule 4, e.g. #602): once that issue alone is green on
@@ -93,5 +104,5 @@ merging into local `main` — runs without asking.
 ## Final report
 
 A table per issue: done / skipped (why) / blocked (why), commits, tests (level reached, pass),
-then: branch and `main` state, what the operator must do (push, post comments), queued tasks,
-and the T4 check that is due.
+**docs touched (or "none needed", said explicitly)**, then: branch and `main` state, what the
+operator must do (push, post comments), queued tasks, and the T4 check that is due.
