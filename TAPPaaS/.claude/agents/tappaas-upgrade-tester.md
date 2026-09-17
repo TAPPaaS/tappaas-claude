@@ -27,12 +27,34 @@ full path. The test ladder and runner are described in the `tappaas-test` skill.
    overrides every module's `rebootOk` (#633).
 4. Deep tests from the dev machine:
    `~/src/tappaas-claude/scripts/tappaas-test.sh hrossen --deep <components> module:<m>...`
-5. **Always restore:** `site-manager repository modify TAPPaaS --branch main`, then
-   `module-manager modify` for the same modules, so hrossen runs `main` again — also after a
-   failure, unless the task says to leave it for debugging.
+5. **Restore unless told otherwise:** `site-manager repository modify TAPPaaS --branch main`,
+   then `module-manager module update` for the same modules, so hrossen runs `main` again —
+   also after a failure. A task that is testing a branch not yet on `main` will tell you to
+   LEAVE the site on that branch; restoring then would drop the code under test. Read the
+   task's instruction before restoring, and say in the report which you did.
 
-Long commands: `setsid nohup bash -c "<cmd> > ~/logs/<n>.log 2>&1; echo \$? > ~/logs/<n>.log.rc" </dev/null >/dev/null 2>&1 &`,
-then wait for the `.rc` file with a single background waiter (never double-background).
+## Long commands — BLOCK, never background the wait
+
+A sweep takes 15-20 minutes. Start it detached on the site so an ssh drop cannot kill it:
+
+```
+setsid nohup bash -c "<cmd> > ~/logs/<n>.log 2>&1; echo \$? > ~/logs/<n>.log.rc" </dev/null >/dev/null 2>&1 &
+```
+
+Then **wait for `~/logs/<n>.log.rc` in the FOREGROUND**, in one call, with a generous tool
+timeout:
+
+```
+ssh <site> 'until [ -f ~/logs/<n>.log.rc ]; do sleep 30; done; cat ~/logs/<n>.log.rc'
+```
+
+**You get no wake-up.** You are a subagent: nothing notifies you when a background command
+finishes, so a waiter you put in the background is a waiter nobody reads — you return with
+"still running" and the run is left unwatched. This has happened three times (G0.2 twice,
+G0.1 once). If a wait times out, wait again; do not return until the `.rc` exists or you can
+say plainly why it never will.
+
+Never end your turn while the work you started is still running.
 
 ## Report
 A table: module/component → updated ok? → tests pass/fail (exit code) → first failing
