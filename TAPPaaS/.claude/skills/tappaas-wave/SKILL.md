@@ -1,11 +1,11 @@
 ---
 name: tappaas-wave
-description: Drives one group of the TAPPaaS 2.1 implementation plan (e.g. "G0.2", "wave 0 group 3") end to end — entry-gate check, one branch, every issue in the group implemented and tested, the group proven on the test site, landed in local main, issues and plan updated. Use when the operator names a wave or group from docs/design/release-2.1-implementation-plan.md, or asks to continue one.
+description: Drives one group of the TAPPaaS security & stability plan, formerly the 2.1 plan (e.g. "G0.2", "wave 0 group 3") end to end — entry-gate check, one branch, every issue in the group implemented and tested, the group proven on the test site, landed in local main, issues and plan updated. Use when the operator names a wave or group from docs/design/security-and-stability-plan.md, or asks to continue one.
 ---
 
 # Running a wave group
 
-The plan is `docs/design/release-2.1-implementation-plan.md`: groups in §3–§7, the test level
+The plan is `docs/design/security-and-stability-plan.md`: groups in §3–§7, the test level
 per upgrade risk in §10.1, the branch → `main` → `stable` rules in §10.2, entry/exit gates in
 §10.3. The per-issue method is the `tappaas-issue` skill; testing is the `tappaas-test` skill.
 This skill strings them together for a whole group with as few stops as possible.

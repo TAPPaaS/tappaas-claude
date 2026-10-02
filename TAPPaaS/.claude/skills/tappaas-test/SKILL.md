@@ -17,7 +17,7 @@ would have caught the issue whenever you fix one.
 ## The ladder
 
 Climb only as far as the change's upgrade risk needs (plan §10.1 in
-`docs/design/release-2.1-implementation-plan.md`).
+`docs/design/security-and-stability-plan.md`).
 
 | Step | Where | How |
 |------|-------|-----|

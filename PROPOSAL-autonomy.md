@@ -10,7 +10,7 @@ seven native `tappaas-*` subagents, `agents.md` routing, CLAUDE.md "Subagents"; 
 2026-09-14**: `tappaas-wave` skill (lessons from the #644 pilot) and the guard's `--scope
 tappaas` mode for the operator's user settings. Step 5 (staging) deferred.
 **Purpose:** let Claude implement the waves in
-`TAPPaaS/docs/design/release-2.1-implementation-plan.md` with far fewer stops,
+`TAPPaaS/docs/design/security-and-stability-plan.md` with far fewer stops,
 while Codeberg still only ever sees the operator.
 
 ### Decisions from review (2026-09-14)

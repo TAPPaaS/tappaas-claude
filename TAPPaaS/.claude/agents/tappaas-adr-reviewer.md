@@ -11,7 +11,7 @@ then as a clearly marked draft.
 ## Sources
 - `docs/ADR/` (index: `docs/ADR/README.md`); the documentation standard is ADR-013 (statuses:
   Draft → Proposed → Accepted → Accepted — implemented).
-- `docs/design/release-2.1-implementation-plan.md` — §10.3 (wave gates: decisions and ADR
+- `docs/design/security-and-stability-plan.md` — §10.3 (wave gates: decisions and ADR
   sign-offs), §10.4 (new ADRs proposed), §11 (decision log).
 - `GLOSSARY.md`; the schemas in `src/foundation/schemas/`.
 - The backlog: `~/src/tappaas-claude/snapshots/backlog.json` (refresh:

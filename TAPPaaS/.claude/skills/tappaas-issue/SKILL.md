@@ -6,7 +6,7 @@ description: Investigate, test, and (with approval) implement a fix/feature for 
 # TAPPaaS Issue Workflow
 
 Purpose: turn a bare "investigate #NNN" (or "look into / fix #NNN") into the full loop
-without the operator re-typing the process each time. For a whole group of the 2.1 plan
+without the operator re-typing the process each time. For a whole group of the security & stability plan
 ("run G0.2") use the `tappaas-wave` skill, which applies these phases per issue without a
 per-issue gate. Follow the phases in order. Stop and
 report at the gate in Phase 4 — do **not** implement before the operator says go.
