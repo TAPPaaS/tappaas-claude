@@ -48,7 +48,7 @@ Use the on-disk clone for everything already on disk — grep, blame, history, f
 Forgejo API is a last resort, not a search index.
 
 - Find the relevant module/foundation code. Verify module names against the tree
-  (`ls src/foundation/`, `src/apps/`) — don't trust stale numbered names from history.
+  (`ls src/foundation/`, `ls src/*/` for the stack directories, or `src/module-catalog.json`) — don't trust stale numbered names from history.
 - `git log`/`git blame` the suspect lines; check for a prior fix or regression (search
   `MEMORY.md` pointers too — outages/regressions are often recorded there).
 - Form a concrete hypothesis of the root cause before touching the live system.

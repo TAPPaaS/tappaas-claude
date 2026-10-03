@@ -26,28 +26,30 @@ find src/foundation/ -path "*/Attic/*" -prune -o -name "*.nix" -print | grep -c 
 find src/foundation/ -path "*/Attic/*" -prune -o -name "*.md" -print | grep -c "\.md$"
 ```
 
-### 2. Count lines in `src/apps/`
+### 2. Count lines in the stack directories
 
-Run the same commands under `src/apps/` (excluding `src/apps/00-Template/`):
+Every module outside foundation lives in its stack's directory, `src/<stack>/` (#421). Run the same
+commands over all of them, excluding `src/misc/00-Template/`:
 
 ```bash
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.sh" -print | xargs wc -l 2>/dev/null | tail -1
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.py" -print | xargs wc -l 2>/dev/null | tail -1
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.nix" -print | xargs wc -l 2>/dev/null | tail -1
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.md" -print | xargs wc -l 2>/dev/null | tail -1
+STACKS=$(find src -mindepth 1 -maxdepth 1 -type d ! -name foundation)
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.sh" -print | xargs wc -l 2>/dev/null | tail -1
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.py" -print | xargs wc -l 2>/dev/null | tail -1
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.nix" -print | xargs wc -l 2>/dev/null | tail -1
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.md" -print | xargs wc -l 2>/dev/null | tail -1
 
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.sh" -print | grep -c "\.sh$"
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.py" -print | grep -c "\.py$"
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.nix" -print | grep -c "\.nix$"
-find src/apps/ -path "*/00-Template/*" -prune -o -name "*.md" -print | grep -c "\.md$"
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.sh" -print | grep -c "\.sh$"
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.py" -print | grep -c "\.py$"
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.nix" -print | grep -c "\.nix$"
+find $STACKS -path "*/00-Template/*" -prune -o -name "*.md" -print | grep -c "\.md$"
 ```
 
 ### 3. Count installed apps
 
-Count the number of non-template app modules in `src/apps/` (directories, excluding `00-Template` and `README.md`):
+Count the non-template modules in the stack directories (one directory per module, excluding `00-Template`):
 
 ```bash
-find src/apps/ -mindepth 1 -maxdepth 1 -type d ! -name "00-Template" | wc -l
+find $(find src -mindepth 1 -maxdepth 1 -type d ! -name foundation) -mindepth 1 -maxdepth 1 -type d ! -name "00-Template" | wc -l
 ```
 
 ### 4. Count foundation modules and scripts
@@ -88,7 +90,7 @@ Generated: <today's date>
 | Documentation (.md) | N |     N |
 | **Total**       | **N** | **N** |
 
-## Apps (`src/apps/`)
+## Stack modules (`src/<stack>/`)
 
 > Excludes `00-Template/` (template scaffolding). Covers N installed app modules.
 

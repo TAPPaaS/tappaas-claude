@@ -160,14 +160,19 @@ Foundation modules are **named, not numbered** (the old `NN-name` numbering was 
 
 > **Before referencing a foundation module by name, verify it against the tree — run `ls src/foundation/`.** This list and the old numbered names in git history/older ADRs go stale; the directory is the source of truth.
 
-###  Platform and Service Modules (src/apps/)
+###  Platform and Service Modules (src/<stack>/)
+Grouped by stack since #421: `src/ai/`, `src/collaboration/`, `src/home/`, `src/security/`, and
+`src/misc/` (modules with no natural stack, plus the `00-Template` skeleton). A module's
+directory follows its JSON's `stack`; each stack directory's README lists its modules in install
+order (generated, `gen-stack-readme.py`). Find a module through `src/module-catalog.json`
+(`moduleJson`), never by guessing its path.
 Each module contains:
 - `<vmname>.json` - module configuration (cores, memory, storage, network zones, dependencies, author, ...)
 - `<vmname>.nix` - NixOS configuration for the VM
 - `install.sh` - Called by tappaas-cicd to install the module
 - `update.sh` - Called regularly to patch/update an installed module
 - `test.sh` - Called regularly to test that the service is functioning correctly, can be used for regression testing of a module
-See `src/apps/00-Template/README.md` for details
+See `src/misc/00-Template/README.md` for details
 
 ### Configuration Files
 - `src/foundation/tappaas-cicd/manager/network-manager/zones.json` - Network zone definitions with VLAN tags and access rules (canonical source of truth)
@@ -179,7 +184,7 @@ See `src/foundation/DEPENDENCIES.csv` and `src/foundation/DEPENDENCIES.md`
 For structure of a module 
 
 ### Module Installation
-`install.sh` in the root of the module will install the module. must be called with arguments see `apps/00-Template/README-install-sh.md`
+`install.sh` in the root of the module will install the module. must be called with arguments see `src/misc/00-Template/README-install-sh.md`
 
 ## Network Zones/VLANs
 Defined in `zones.json` with VLAN tags.

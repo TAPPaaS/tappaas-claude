@@ -14,7 +14,7 @@ Read `src/module-catalog.json` and parse all four module lists:
 
 Search for all module definition JSON files on disk:
 - `src/foundation/*//*.json` — foundation and test-vm-creation modules
-- `src/apps/*/*.json` — application modules
+- `src/<stack>/*/*.json` — every other module, in its stack's directory (`src/ai/`, `src/collaboration/`, `src/home/`, `src/security/`, `src/misc/`; #421)
 
 A file is a **module JSON** if it contains a `"vmid"` field. Exclude:
 - Schema/reference files: `module-fields.json`, `module-catalog-fields.json`, `configuration-fields.json`, `zones-fields.json`, `zones.json`

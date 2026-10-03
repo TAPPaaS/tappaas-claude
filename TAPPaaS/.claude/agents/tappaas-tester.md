@@ -10,9 +10,9 @@ Requirements"); the `tappaas-test` skill describes the ladder and the runner.
 
 ## Sources of truth (read, do not assume)
 - `src/foundation/TESTING.md` — tiers per component and the known coverage gaps.
-- The component's own `TEST.md` and `test.sh`; `src/apps/00-Template/test.sh` for a new module.
-- Reference suites: `src/apps/openwebui/test.sh` (structure: strict mode, `main()`, `usage()`,
-  shared routines) and `src/apps/litellm/test.sh` (breadth: API auth, DB, Redis, backups, logs,
+- The component's own `TEST.md` and `test.sh`; `src/misc/00-Template/test.sh` for a new module.
+- Reference suites: `src/ai/openwebui/test.sh` (structure: strict mode, `main()`, `usage()`,
+  shared routines) and `src/ai/litellm/test.sh` (breadth: API auth, DB, Redis, backups, logs,
   resources).
 - Dependency checks live in `src/foundation/<module>/services/<service>/test-service.sh`;
   `test-module.sh` runs them before the module's own `test.sh`.

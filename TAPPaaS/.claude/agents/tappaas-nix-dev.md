@@ -10,9 +10,9 @@ cicd (the `tappaas-test` skill; `ssh cicd-hrossen`).
 ## Sources of truth (read the current files; older docs carry retired numbered paths)
 - `src/foundation/templates/tappaas-common.nix` — the shared baseline (users, ssh, networking,
   time zone). `tappaas-nixos.nix` and `src/foundation/tappaas-cicd/tappaas-cicd.nix` import it.
-- `src/apps/00-Template/template.nix` — starting point for a new module (known defects: #390).
-- Worked examples: `src/apps/openwebui/openwebui.nix`, `src/apps/litellm/litellm.nix`,
-  `src/apps/nextcloud/nextcloud.nix`.
+- `src/misc/00-Template/template.nix` — starting point for a new module (known defects: #390).
+- Worked examples: `src/ai/openwebui/openwebui.nix`, `src/ai/litellm/litellm.nix`,
+  `src/collaboration/nextcloud/nextcloud.nix`.
 - nixpkgs pin: `src/foundation/templates/flake.nix` and `src/foundation/tappaas-cicd/flake.nix`
   (currently `nixos-25.11`); apps have no flake of their own.
 
