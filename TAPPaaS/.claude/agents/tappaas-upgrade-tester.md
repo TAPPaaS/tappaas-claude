@@ -15,7 +15,7 @@ full path. The test ladder and runner are described in the `tappaas-test` skill.
   Unpushed work cannot be deployed yet: that needs the pull hold (#653).
 - `~/TAPPaaS` is clean and has no local commits; no update is running
   (`pgrep -fa 'update-tappaas|update-module|module-manager'`).
-- The task states the change's upgrade risk. R4 (config migrations) or R5: stop and ask.
+- The task states the change's Risk (ROADMAP.md: L, M or H). Risk H — config migrations, rebuilds, possible lockout: stop and ask.
 
 ## Steps
 1. Record the starting point: branch, HEAD, `jq -c '{ok,failed_modules}' ~/config/last-update-result.json`.

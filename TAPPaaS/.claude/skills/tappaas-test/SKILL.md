@@ -8,7 +8,7 @@ description: How to test a TAPPaaS change — the test ladder (local lint → si
 The Mac has no nix, node or tsc: anything beyond lint runs on a site's cicd. Sites and
 their roles are in `~/src/tappaas-claude/SITES.md` (public) and `SITES.local.md` (addresses).
 
-- **hrossen.dk — test site.** All tests; R≤3 changes without asking.
+- **hrossen.dk — test site.** All tests; Risk L and M changes without asking.
 - **makerfloss — canary.** Stays on `main`. Fast tests only unless the operator asks.
 
 Run tests without asking (CLAUDE.md "Testing Requirements"). Add a deep-tier case that

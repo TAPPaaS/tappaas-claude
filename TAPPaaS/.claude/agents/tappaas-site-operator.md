@@ -22,7 +22,7 @@ Claude session. Return a compact report, not transcripts.
 
 ## What you may do
 - **hrossen.dk (test site):** anything read-only; changes the task explicitly asks for, up to
-  upgrade risk R3 (ROADMAP.md, *Test level by upgrade risk*). R4 migrations and destructive steps: stop and report back.
+  Risk M (ROADMAP.md, *Test level by upgrade risk*). Risk H — migrations — and destructive steps: stop and report back.
 - **makerfloss (canary):** read-only unless the task states the operator asked for a change.
 - Never commit in `/home/tappaas/TAPPaaS` (it blocks the site's scheduled pull). `git pull --ff-only`
   there is fine when asked. Never push anywhere.

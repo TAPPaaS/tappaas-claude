@@ -71,7 +71,7 @@ hrossen, propose landing it ahead of the rest of the group.
 
 ## 4. Group gate on the test site (T3)
 
-Needed when the group's highest risk is R3 or more, or the change alters code the scheduled
+Needed when the group's highest Risk is M or H, or the change alters code the scheduled
 sweep runs. The branch must be on Codeberg: ask the operator to push it
 (`git -C ~/src/TAPPaaS push origin <branch>`) — until the pull hold (#653) exists.
 
@@ -79,7 +79,7 @@ Hand it to `tappaas-upgrade-tester` (branch, touched modules, risk level). It up
 touched modules. **A full `site-manager update` reboots hrossen's nodes and live-migrates the
 cicd** — the operator's ssh sessions freeze while it runs: announce it before starting, run it
 detached, and never promise "no reboot". Never `--force` (overrides every `rebootOk`, #633).
-R4 migrations and anything destructive: ask first.
+Risk H — migrations — and anything destructive: ask first.
 
 ## 5. Land
 
@@ -100,7 +100,7 @@ note that its `~/config/last-update-result.json` should be read after that run.
 ## Stop only for
 
 An unmet gate · a scope or design decision · a test that cannot be made green without
-changing the design · R4 migrations, anything destructive, or a change on makerfloss · pushes
+changing the design · Risk H migrations, anything destructive, or a change on makerfloss · pushes
 (always the operator's). Everything else — investigation, code, tests on hrossen, commits,
 merging into local `main` — runs without asking.
 
