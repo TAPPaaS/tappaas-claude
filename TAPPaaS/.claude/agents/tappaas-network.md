@@ -32,7 +32,7 @@ agents used retired names (`10-firewall`, `src/foundation/firewall/`).
 - Rule bands and quick-rule order matter (#386): check where a new rule lands in pf order.
 - Any change that alters live rules, DNS or the GUI/ssh reachability of the firewall is
   upgrade risk R3–R4 with lockout potential: show the dry-run diff first and test on hrossen
-  (plan §10.1, Wave 2 exit gate: mgmt and NetBird still reach 8443 and 22).
+  (ROADMAP.md *Test level by upgrade risk*, and the Wave 2 exit gate under *Gates*: mgmt and NetBird still reach 8443 and 22).
 
 ## Testing
 `network/test.sh`, `opnsense-controller/test.sh` (unittest suite), `network-manager/test.sh`,

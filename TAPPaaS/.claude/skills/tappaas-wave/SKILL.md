@@ -1,13 +1,14 @@
 ---
 name: tappaas-wave
-description: Drives one group of the TAPPaaS security & stability plan, formerly the 2.1 plan (e.g. "G0.2", "wave 0 group 3") end to end — entry-gate check, one branch, every issue in the group implemented and tested, the group proven on the test site, landed in local main, issues and plan updated. Use when the operator names a wave or group from docs/design/security-and-stability-plan.md, or asks to continue one.
+description: Drives one group of the TAPPaaS roadmap (ROADMAP.md, the security & stability waves) (e.g. "G0.2", "wave 0 group 3") end to end — entry-gate check, one branch, every issue in the group implemented and tested, the group proven on the test site, landed in local main, issues and ROADMAP.md updated. Use when the operator names a wave or group from ROADMAP.md, or asks to continue one.
 ---
 
 # Running a wave group
 
-The plan is `docs/design/security-and-stability-plan.md`: groups in §3–§7, the test level
-per upgrade risk in §10.1, the branch → `main` → `stable` rules in §10.2, entry/exit gates in
-§10.3. The per-issue method is the `tappaas-issue` skill; testing is the `tappaas-test` skill.
+The plan is `ROADMAP.md` at the repository root: the waves latest first (Wave 4 … Wave 0), each
+group with its open rows; *Test level by upgrade risk* and the standing rules near the top;
+open gates, decisions and ADRs under *Planning items still open*. Releases are at the bottom:
+when a boundary is cut, done rows move there. The per-issue method is the `tappaas-issue` skill; testing is the `tappaas-test` skill.
 This skill strings them together for a whole group with as few stops as possible.
 
 ## 0. Self-check (always, first)
@@ -20,8 +21,8 @@ This skill strings them together for a whole group with as few stops as possible
 
 ## 1. Entry gate
 
-Read the group's table and its row in §10.3. Check every item: decisions in §11, ADR status
-lines in `docs/ADR/`, prerequisite waves on `stable`. Delegate to `tappaas-adr-reviewer` when
+Read the group's table and its row in *Gates* (no row = no open gate). Check every item:
+*Decisions*, ADR status lines in `docs/ADR/`, prerequisite waves on `stable`. Delegate to `tappaas-adr-reviewer` when
 an ADR has to be read against the code. **Unmet gate → report exactly what is missing and stop.**
 
 ## 2. Branch
@@ -48,7 +49,7 @@ For each issue in the group table:
    that closes it. `tappaas-tester` adds the regression case and proves it fails without the
    fix. `tappaas-security` reviews anything touching exposure, secrets, ssh or firewall rules
    (mandatory in Wave 2). `tappaas-network` / `tappaas-nix-dev` for their domains.
-5. **Test** to the issue's level (§10.1): T0–T2 with `tappaas-test.sh hrossen …`.
+5. **Test** to the issue's level (*Test level by upgrade risk*): T0–T2 with `tappaas-test.sh hrossen …`.
 6. **Docs, in the same commit as the change** — part of the fix, not a sweep afterwards.
    Before committing, grep the tree for what the change made false and fix it: the flag or
    verb you renamed or added, the mechanism you replaced, the check whose verdict changed,
@@ -65,7 +66,7 @@ For each issue in the group table:
 8. Draft one short comment per issue in `~/src/tappaas-claude/outbox/<N>.md` (what changed, how
    it was tested — no preamble).
 
-**Data-safety fast lane** (§10.2 rule 4, e.g. #602): once that issue alone is green on
+**Data-safety fast lane** (ROADMAP.md standing rules; ADR-028 D12, e.g. #602): once that issue alone is green on
 hrossen, propose landing it ahead of the rest of the group.
 
 ## 4. Group gate on the test site (T3)
@@ -89,8 +90,10 @@ note that its `~/config/last-update-result.json` should be read after that run.
 
 ## 6. Bookkeeping
 
-- Under the group heading in the plan, add one line: `Status: landed YYYY-MM-DD — <commits>`
-  (or `in progress` with what remains). Commit it with the group.
+- In `ROADMAP.md`: tick each finished row ✅ (it stays in its wave until the next release is cut),
+  update the group heading's counts (`done for <next version>: N · open: N`) and the *At a glance*
+  row, and under the group heading add one line: `Status: landed YYYY-MM-DD — <commits>` (or
+  `in progress` with what remains). Commit it with the group.
 - Offer to post the outbox comments (`tea comment`, one approval each). Issues with `close #N`
   close when the operator pushes.
 

@@ -11,8 +11,9 @@ then as a clearly marked draft.
 ## Sources
 - `docs/ADR/` (index: `docs/ADR/README.md`); the documentation standard is ADR-013 (statuses:
   Draft → Proposed → Accepted → Accepted — implemented).
-- `docs/design/security-and-stability-plan.md` — §10.3 (wave gates: decisions and ADR
-  sign-offs), §10.4 (new ADRs proposed), §11 (decision log).
+- `ROADMAP.md` (repository root) — *Planning items still open*: *Decisions*, *Gates* (what a wave
+  or group waits on: decisions and ADR sign-offs) and *ADRs still to write*. Met gates and closed
+  decisions are not listed; they shipped with the release that carried their wave.
 - `GLOSSARY.md`; the schemas in `src/foundation/schemas/`.
 - The backlog: `~/src/tappaas-claude/snapshots/backlog.json` (refresh:
   `~/src/tappaas-claude/scripts/forge-snapshot.py ~/src/tappaas-claude/snapshots/backlog.json`,
@@ -28,8 +29,9 @@ For each decision (D1, D2, …) in the ADR:
 Check the header status against reality (e.g. ADR-012 says Accepted while #605 says Proposed).
 
 ## Gate check (when asked about a wave or group)
-List every entry-gate item from plan §10.3 for that wave/group: met / not met, with the
-evidence (ADR status line, decision-log entry, merged code).
+List every gate item from ROADMAP.md *Gates* for that wave/group: met / not met, with the
+evidence (ADR status line, the decision on the issue, merged code). A wave or group with no
+row there has no open gate.
 
 ## Report
 Decision table, gate verdict if asked, the smallest set of changes that would make the ADR
