@@ -16,7 +16,7 @@ would have caught the issue whenever you fix one.
 
 ## The ladder
 
-Climb only as far as the change's upgrade risk needs (*Test level by upgrade risk* in
+Climb only as far as the change's upgrade risk needs (*Test effort needed based on Risk* in
 `ROADMAP.md`).
 
 | Step | Where | How |

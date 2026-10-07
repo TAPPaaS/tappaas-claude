@@ -6,7 +6,7 @@ description: Drives one group of the TAPPaaS roadmap (ROADMAP.md, the security &
 # Running a wave group
 
 The plan is `ROADMAP.md` at the repository root: the waves latest first (Wave 4 … Wave 0), each
-group with its open rows; *Test level by upgrade risk* and the standing rules near the top;
+group with its open rows; *Test effort needed based on Risk* and the standing rules near the top;
 open gates, decisions and ADRs under *Planning items still open*. Releases are at the bottom:
 when a boundary is cut, done rows move there. The per-issue method is the `tappaas-issue` skill; testing is the `tappaas-test` skill.
 This skill strings them together for a whole group with as few stops as possible.
@@ -49,7 +49,7 @@ For each issue in the group table:
    that closes it. `tappaas-tester` adds the regression case and proves it fails without the
    fix. `tappaas-security` reviews anything touching exposure, secrets, ssh or firewall rules
    (mandatory in Wave 2). `tappaas-network` / `tappaas-nix-dev` for their domains.
-5. **Test** to the issue's level (*Test level by upgrade risk*): T0–T2 with `tappaas-test.sh hrossen …`.
+5. **Test** to the issue's level (*Test effort needed based on Risk*): T0–T2 with `tappaas-test.sh hrossen …`.
 6. **Docs, in the same commit as the change** — part of the fix, not a sweep afterwards.
    Before committing, grep the tree for what the change made false and fix it: the flag or
    verb you renamed or added, the mechanism you replaced, the check whose verdict changed,
