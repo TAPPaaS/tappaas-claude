@@ -51,6 +51,26 @@ Builds, serves from fixtures, captures every route in `e2e/routes.json` at the f
 
 A coding session's done-criterion: `ui/test.sh` green, `scripts/test/test-console-design.sh` green, `run.sh` clean or the diff is the intended one and the baseline updated.
 
+## Shipping a web change: the dist, the push, hrossen
+
+The served web app is `ui/web/dist`, committed, and nix builds its own copy from the lock file (`ui/default.nix`, `buildNpmPackage` with `npmDepsHash`). A session never commits a Mac-built dist: it builds on hrossen's nix and commits that.
+
+1. **Lock unchanged?** `git diff <last dist commit>..HEAD -- ui/web/package-lock.json`. If the lock changed, the hash in `ui/default.nix` must be recomputed on hrossen first (`prefetch-npm-deps package-lock.json`) and committed, or the module update fails on the old hash.
+2. **Build on hrossen** from a scratch copy of the committed tree (never the live checkout):
+   ```bash
+   export SSH_AUTH_SOCK="$(launchctl getenv SSH_AUTH_SOCK)"
+   ssh cicd-hrossen 'pgrep -af "site-manager|module-manager" | grep -v pgrep; rm -rf ~/dev/scratch-dist && mkdir -p ~/dev/scratch-dist'
+   git archive HEAD src/foundation/tappaas-cicd/ui | ssh cicd-hrossen 'tar -x -C ~/dev/scratch-dist'
+   ssh cicd-hrossen 'cd ~/dev/scratch-dist/src/foundation/tappaas-cicd/ui && nix-build default.nix -A web --no-out-link | tail -1'
+   ```
+   The store path printed holds `index.html` and `assets/` at its root.
+3. **Commit the dist**: the old files are read-only (they came from the store), so `chmod -R u+w web/dist` before `rm -rf web/dist`; then `ssh cicd-hrossen "cd <store path> && tar -c .; rm -rf ~/dev/scratch-dist" | tar -x -C web/dist`, `chmod -R u+w web/dist`, and commit only `ui/web/dist` as `build(console): web dist with …`.
+4. **The operator pushes** (a hook blocks pushing from a session). Ask for it once, with everything merged; confirm with `git fetch` that `origin/adr-041` is at the tip before deploying, since a push can stop short.
+5. **Deploy**: `ssh cicd-hrossen '~/bin/refresh-control-plane.sh; module-manager update tappaas-cicd'` (the module test step runs; the console service restarts), then `systemctl is-active tappaas-console.service`.
+6. **Check live** at `https://console.hrossen.dk` in the browser pane (the operator is signed in there; a session never enters credentials): `get_page_text` or `find` for the changed wording, one screenshot at scale 0.6 for a layout change. A read that lands before the storage inventory loads shows pools without sizes; read again.
+
+Only one session writes the console sources at a time: a second GUI session works on its own worktree and branch, and the session that merges does steps 2 to 5 once for the merged tree.
+
 ## Reading a page cheaply
 
 `read_page` with `filter: interactive` to find controls, `find` by label, `get_page_text` for wording, `zoom` for an icon, a screenshot at scale 0.5 only for layout, and the capture's `.txt` instead of a live page whenever fixture mode has the route. One screenshot per page and viewport, never one per step.
