@@ -1,0 +1,66 @@
+diff --git a/src/foundation/tappaas-cicd/manager/module-manager/snapshot-vm.sh b/src/foundation/tappaas-cicd/manager/module-manager/snapshot-vm.sh
+index 5dccf2d8..08931412 100755
+--- a/src/foundation/tappaas-cicd/manager/module-manager/snapshot-vm.sh
++++ b/src/foundation/tappaas-cicd/manager/module-manager/snapshot-vm.sh
+@@ -160,6 +160,22 @@ get_snapshot_names() {
+         | grep -v '^$'
+ }
+ 
++# ── Helper: wait for the VM's Proxmox lock to clear ──────────────────
++# snapshot/delsnapshot hold a lock (e.g. 'snapshot-delete') on the guest while
++# the storage merge runs; the next qm/pct command fails until it clears. Poll the
++# config for the lock line to disappear so serial deletes don't step on each other.
++wait_for_vm_unlock() {
++    local waited=0 timeout="${LOCK_TIMEOUT:-300}"
++    while [[ "${waited}" -lt "${timeout}" ]]; do
++        ssh -n root@"${NODE_FQDN}" "${CMD} config ${VMID}" 2>/dev/null \
++            | grep -q '^lock:' || return 0
++        sleep 3
++        waited=$((waited + 3))
++    done
++    warn "VM ${VMID} still shows a lock after ${timeout}s — proceeding anyway"
++    return 0
++}
++
+ # ── Actions ──────────────────────────────────────────────────────────
+ 
+ case "${ACTION}" in
+@@ -203,14 +219,35 @@ case "${ACTION}" in
+         TO_DELETE=$(echo "${SNAPSHOTS}" | head -n "${DELETE_COUNT}")
+ 
+         info "  Found ${SNAP_COUNT} snapshots, keeping last ${KEEP}, deleting ${DELETE_COUNT}"
++        # Two bugs made this remove only the oldest snapshot per run yet still
++        # report success (the podman-lab1 backlog): the delsnapshot ssh ran without
++        # -n, so the first call swallowed the rest of the here-string and the loop
++        # stopped after one iteration (SC2095); and the removed count was assumed,
++        # not measured. Fix: ssh -n; wait out the VM lock ('snapshot-delete') a
++        # storage merge holds; retry once; report what ACTUALLY succeeded.
++        removed=0
+         while IFS= read -r snap; do
+             [[ -z "${snap}" ]] && continue
+             info "  Deleting snapshot: ${BL}${snap}${CL}"
+-            ssh root@"${NODE_FQDN}" "${CMD} delsnapshot ${VMID} '${snap}'" \
+-                || warn "Failed to delete snapshot '${snap}'"
++            wait_for_vm_unlock
++            if ssh -n root@"${NODE_FQDN}" "${CMD} delsnapshot ${VMID} '${snap}'"; then
++                removed=$((removed + 1))
++            else
++                # Most often a lingering lock — wait it out and try once more.
++                wait_for_vm_unlock
++                if ssh -n root@"${NODE_FQDN}" "${CMD} delsnapshot ${VMID} '${snap}'"; then
++                    removed=$((removed + 1))
++                else
++                    warn "Failed to delete snapshot '${snap}'"
++                fi
++            fi
+         done <<< "${TO_DELETE}"
+ 
+-        info "${GN}Cleanup completed — ${DELETE_COUNT} snapshot(s) removed${CL}"
++        if [[ "${removed}" -eq "${DELETE_COUNT}" ]]; then
++            info "${GN}Cleanup completed — ${removed} snapshot(s) removed${CL}"
++        else
++            warn "Cleanup incomplete — removed ${removed} of ${DELETE_COUNT} requested (see warnings above)"
++        fi
+         ;;
+ 
+     restore)

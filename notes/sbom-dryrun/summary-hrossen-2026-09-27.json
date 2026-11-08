@@ -1,0 +1,86 @@
+[
+  {
+    "target": "mothership",
+    "kind": "nix",
+    "seen": 427,
+    "coverage": "ok",
+    "findings": 115,
+    "critical": 8,
+    "high": 53,
+    "fixable": "unknown",
+    "crit_high_fixable": "unknown",
+    "verdict": "triage (nix: CPE-only, no fix-state)"
+  },
+  {
+    "target": "identity",
+    "kind": "nix",
+    "seen": 368,
+    "coverage": "ok",
+    "findings": 110,
+    "critical": 10,
+    "high": 50,
+    "fixable": "unknown",
+    "crit_high_fixable": "unknown",
+    "verdict": "triage (nix: CPE-only, no fix-state)"
+  },
+  {
+    "target": "unreachable-guest",
+    "kind": "nix",
+    "seen": 0,
+    "coverage": "FAIL",
+    "findings": 0,
+    "critical": 0,
+    "high": 0,
+    "fixable": "unknown",
+    "crit_high_fixable": "unknown",
+    "verdict": "SCAN FAILED — not clean"
+  },
+  {
+    "target": "authentik (image@digest)",
+    "kind": "image",
+    "seen": 425,
+    "coverage": "ok",
+    "findings": 546,
+    "critical": 14,
+    "high": 175,
+    "fixable": "394",
+    "crit_high_fixable": "154",
+    "verdict": "ACT: 154 critical/high fixable"
+  },
+  {
+    "target": "tappaas1 (debian)",
+    "kind": "debian",
+    "seen": 813,
+    "coverage": "ok",
+    "findings": 2675,
+    "critical": 10,
+    "high": 211,
+    "fixable": "0",
+    "crit_high_fixable": "0",
+    "verdict": "nothing actionable — watch"
+  },
+  {
+    "target": "tappaas1 NO debian_version",
+    "kind": "debian",
+    "seen": 0,
+    "coverage": "FAIL",
+    "findings": 0,
+    "critical": 0,
+    "high": 0,
+    "fixable": "0",
+    "crit_high_fixable": "0",
+    "verdict": "SCAN FAILED — not clean"
+  },
+  {
+    "target": "firewall (opnsense)",
+    "kind": "freebsd",
+    "seen": 209,
+    "coverage": "ok",
+    "findings": 55,
+    "critical": 0,
+    "high": 0,
+    "fixable": "via-channel",
+    "crit_high_fixable": "-",
+    "verdict": "waiting on upstream (channel current)"
+  }
+]

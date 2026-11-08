@@ -47,9 +47,9 @@ Serves every page from the fixtures on this machine; `CONSOLE_NOW` stops the ser
 src/foundation/tappaas-cicd/ui/web/e2e/run.sh [--routes id,…] [--viewports phone,laptop] [--allow id,…] [--update-baseline]
 ```
 
-Builds, serves from fixtures, captures every route in `e2e/routes.json` at the four viewports (phone 390×844, tablet 820×1180, laptop 1366×768, desktop 1920×1080) as a PNG and an accessibility `.txt`, diffs against the local baseline and writes `e2e/report.md`. Read the report, open only the diff images it names, at half scale. A route the change names may differ (`--allow`); any other difference is a regression. PNG baselines are local (regenerated from the base commit when stale); the `.txt` baselines are in git and are refreshed with `--update-baseline` when the operator has accepted a look.
+Builds, serves from fixtures, captures every route in `e2e/routes.json` at the four viewports (phone 390×844, tablet 820×1180, laptop 1366×768, desktop 1920×1080) as a PNG and an accessibility `.txt`, diffs against the local baseline and writes `e2e/report.md`. Read the report, open only the diff images it names, at half scale. A route the change names may differ (`--allow`); any other difference is a regression. The baseline (PNG and `.txt`) lives outside the repository in `~/.cache/tappaas-console-e2e/`, made from the merge base with main when stale; nothing of it is committed. `--update-baseline` makes the working tree the baseline, to compare the next steps of a change with.
 
-A coding session's done-criterion: `ui/test.sh` green, `scripts/test/test-console-design.sh` green, `run.sh` clean or the diff is the intended one and the baseline updated.
+A coding session's done-criterion: `ui/test.sh` green, `scripts/test/test-console-design.sh` green, `run.sh` clean or the diff is the intended one.
 
 ## Shipping a web change: the dist, the push, hrossen
 
@@ -65,7 +65,7 @@ The served web app is `ui/web/dist`, committed, and nix builds its own copy from
    ```
    The store path printed holds `index.html` and `assets/` at its root.
 3. **Commit the dist**: the old files are read-only (they came from the store), so `chmod -R u+w web/dist` before `rm -rf web/dist`; then `ssh cicd-hrossen "cd <store path> && tar -c .; rm -rf ~/dev/scratch-dist" | tar -x -C web/dist`, `chmod -R u+w web/dist`, and commit only `ui/web/dist` as `build(console): web dist with …`.
-4. **The operator pushes** (a hook blocks pushing from a session). Ask for it once, with everything merged; confirm with `git fetch` that `origin/adr-041` is at the tip before deploying, since a push can stop short.
+4. **The operator pushes** (a hook blocks pushing from a session). Ask for it once, with everything merged; confirm with `git fetch` that `origin/main` is at the tip before deploying, since a push can stop short.
 5. **Deploy**: `ssh cicd-hrossen '~/bin/refresh-control-plane.sh; module-manager update tappaas-cicd'` (the module test step runs; the console service restarts), then `systemctl is-active tappaas-console.service`.
 6. **Check live** at `https://console.hrossen.dk` in the browser pane (the operator is signed in there; a session never enters credentials): `get_page_text` or `find` for the changed wording, one screenshot at scale 0.6 for a layout change. A read that lands before the storage inventory loads shows pools without sizes; read again.
 
