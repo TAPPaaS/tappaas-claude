@@ -90,6 +90,7 @@ note that its `~/config/last-update-result.json` should be read after that run.
 
 ## 6. Bookkeeping
 
+- Each issue's highest test level is in the ledger (`backlog.py test`, see `tappaas-test`).
 - In `ROADMAP.md`: tick each finished row ✅ (it stays in its wave until the next release is cut),
   update the group heading's counts (`done for <next version>: N · open: N`) and the *At a glance*
   row, and under the group heading add one line: `Status: landed YYYY-MM-DD — <commits>` (or

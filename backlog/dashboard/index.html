@@ -1,0 +1,330 @@
+<meta name="dash-one-writer">
+<style>
+  .bk { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); }
+  .bk-head { display: grid; gap: var(--cds-gap-xs); }
+  .bk-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .bk-lede { margin: 0; font-size: var(--cds-font-size-body); max-width: 70ch; }
+  .bk-lede b, .bk-tile b { font-weight: 600; }
+  .bk-src { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .bk-src code { font-family: ui-monospace, Menlo, monospace; }
+  .bk-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: var(--cds-gap-md); }
+  .bk-tile { all: unset; box-sizing: border-box; cursor: pointer; display: grid; gap: var(--cds-gap-xs); padding: var(--cds-pad-md) var(--cds-pad-lg);
+    background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); }
+  .bk-tile:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .bk-tile[aria-pressed="true"] { border-color: var(--color-fg); }
+  .bk-tile-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: center; gap: var(--cds-gap-xs); }
+  .bk-tile-num { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .bk-dot { width: .55rem; height: .55rem; border-radius: 50%; flex: none; display: inline-block; }
+  .bk-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg);
+    display: grid; gap: var(--cds-gap-md); min-width: 0; container-type: inline-size; }
+  .bk-card h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .bk-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .bk-scroll { overflow: auto; max-height: 34rem; }
+  .bk-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .bk-table th { position: sticky; top: 0; background: var(--color-panel); text-align: left; font-weight: var(--cds-font-weight-medium);
+    color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; z-index: 1; }
+  .bk-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+  .bk-table th button { all: unset; cursor: pointer; }
+  .bk-table th button:focus-visible { outline: 2px solid var(--color-fg); }
+  .bk-groups tbody tr { cursor: pointer; }
+  .bk-groups tbody tr:hover td, .bk-groups tbody tr.is-on td { background: color-mix(in srgb, var(--color-fg) 5%, transparent); }
+  .bk-wave { color: var(--color-fg-muted); white-space: nowrap; }
+  .bk-gid { font-weight: 600; white-space: nowrap; }
+  .bk-bar { display: flex; height: .7rem; border-radius: var(--cds-radius); overflow: hidden; min-width: 8rem; background: var(--color-border-line); }
+  .bk-bar span { display: block; height: 100%; }
+  .bk-barcap { margin-top: 3px; color: var(--color-fg-muted); white-space: nowrap; }
+  .bk-pill { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; padding: 1px 7px; border-radius: 999px;
+    border: 1px solid var(--color-border-line); font-size: var(--cds-font-size-caption); }
+  .bk-ttl { font-size: var(--cds-font-size-body); }
+  .bk-tnote { color: var(--color-fg-muted); margin-top: 2px; max-width: 60ch; }
+  .bk-mono { font-family: ui-monospace, Menlo, monospace; font-size: .95em; }
+  .bk-filters { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; }
+  .bk-search { font: inherit; font-size: var(--cds-font-size-caption); padding: 5px 9px; border-radius: var(--cds-radius);
+    border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg); min-width: 0; flex: 1 1 12rem; }
+  .bk-btn { font: inherit; font-size: var(--cds-font-size-caption); padding: 5px 10px; border-radius: var(--cds-radius); cursor: pointer;
+    border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg); }
+  .bk-btn[aria-pressed="true"] { border-color: var(--color-fg); font-weight: 600; }
+  .bk-count { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .bk-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+  .bk-details summary { cursor: pointer; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .bk-details dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: var(--cds-font-size-caption); margin: var(--cds-gap-sm) 0 0; }
+  .bk-details dt { font-weight: 600; } .bk-details dd { margin: 0; color: var(--color-fg-muted); }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  [data-dash-source-state=empty] { color: transparent; }
+  @container (max-width: 720px) { .bk-narrow-hide { display: none; } }
+</style>
+
+<div class="bk">
+  <header class="bk-head">
+    <h1 class="bk-title" id="top">TAPPaaS Backlog</h1>
+    <p class="bk-lede"><b data-draw="sum" data-source="summary" data-field="open">—</b> tasks open across <b data-draw="sum" data-source="summary" data-field="streams">—</b> workstreams. <b data-draw="sum" data-source="summary" data-field="done">—</b> are done for the next release, and <b data-draw="sum" data-source="summary" data-field="gaps">—</b> of those have no live test on record.</p>
+    <p class="bk-src">From ROADMAP.md at <code data-draw="meta" data-source="meta" data-field="roadmapCommit" data-row="0">—</code> · Codeberg snapshot <span data-draw="meta" data-source="meta" data-field="snapshotAt" data-row="0">—</span> · local main <code data-draw="meta" data-source="meta" data-field="main" data-row="0">—</code>, <span data-draw="meta" data-source="meta" data-field="unpushedCommits" data-row="0">—</span> commits not pushed · built <span data-draw="meta" data-source="meta" data-field="generated" data-row="0">—</span></p>
+  </header>
+
+  <div class="bk-tiles" aria-label="Filter tasks by stage">
+    <button class="bk-tile" data-stage="To do" aria-pressed="false"><span class="bk-tile-label"><span class="bk-dot" data-dot="To do"></span>To do</span><span class="bk-tile-num" data-draw="sum" data-source="summary" data-field="todo">—</span></button>
+    <button class="bk-tile" data-stage="In progress" aria-pressed="false"><span class="bk-tile-label"><span class="bk-dot" data-dot="In progress"></span>In progress</span><span class="bk-tile-num" data-draw="sum" data-source="summary" data-field="inprog">—</span></button>
+    <button class="bk-tile" data-stage="Waiting|Blocked" aria-pressed="false"><span class="bk-tile-label"><span class="bk-dot" data-dot="Blocked"></span>Waiting or blocked</span><span class="bk-tile-num" data-draw="sum" data-source="summary" data-field="blocked">—</span></button>
+    <button class="bk-tile" data-stage="Done" aria-pressed="false"><span class="bk-tile-label"><span class="bk-dot" data-dot="Done"></span>Done for next release</span><span class="bk-tile-num" data-draw="sum" data-source="summary" data-field="done">—</span></button>
+    <button class="bk-tile" data-stage="gaps" aria-pressed="false"><span class="bk-tile-label"><span class="bk-dot" data-dot="gap"></span>Test gaps</span><span class="bk-tile-num" data-draw="sum" data-source="summary" data-field="gaps">—</span></button>
+    <button class="bk-tile" data-stage="Parked" aria-pressed="false"><span class="bk-tile-label"><span class="bk-dot" data-dot="Parked"></span>Parked</span><span class="bk-tile-num" data-draw="sum" data-source="summary" data-field="parked">—</span></button>
+  </div>
+
+  <section class="bk-card" id="workstreams">
+    <h2>Workstreams</h2>
+    <p class="bk-note">Each roadmap group, latest wave first. The bar shows its rows by stage; click a row to list its tasks.</p>
+    <div class="bk-scroll">
+      <table class="bk-table bk-groups" data-source="groups" data-row-key="group">
+        <thead><tr>
+          <th data-field="wave">Wave</th>
+          <th data-field="group">Group</th>
+          <th data-field="name">Workstream</th>
+          <th data-field="risk" class="bk-narrow-hide">Risk</th>
+          <th data-field="rows">Rows by stage</th>
+          <th data-field="testGaps">Test gaps</th>
+          <th data-field="released" class="bk-narrow-hide">Released</th>
+        </tr></thead>
+        <tbody data-draw="grouprows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="bk-card" id="tasks">
+    <h2>Tasks</h2>
+    <p class="bk-note">Every row of the roadmap's waves and Future Work. Code comes from local git; test from the test ledger, or from the row's note where marked inferred.</p>
+    <div class="bk-filters">
+      <input id="bk-q" class="bk-search" type="search" placeholder="Search number, title or note" aria-label="Search tasks">
+      <select id="bk-group" class="dash-select" data-draw="groupsel" data-source="groups" aria-label="Workstream"></select>
+      <button class="bk-btn" id="bk-clear">Show all</button>
+      <span class="bk-count" data-draw="taskcount" data-source="tasks">—</span>
+    </div>
+    <div class="bk-scroll">
+      <table class="bk-table bk-tasks" data-source="tasks" data-row-key="key">
+        <thead><tr>
+          <th data-field="id"><button data-sort="num">Task</button></th>
+          <th data-field="title"><button data-sort="title">Title and note</button></th>
+          <th data-field="group" class="bk-narrow-hide"><button data-sort="group">Group</button></th>
+          <th data-field="risk"><button data-sort="risk">Risk</button></th>
+          <th data-field="stage"><button data-sort="stage">Stage</button></th>
+          <th data-field="code" class="bk-narrow-hide"><button data-sort="code">Code</button></th>
+          <th data-field="testState"><button data-sort="testState">Test</button></th>
+        </tr></thead>
+        <tbody data-draw="taskrows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="bk-two">
+    <section class="bk-card" id="decisions">
+      <h2>Open decisions</h2>
+      <p class="bk-note">Questions the waves wait on, from the roadmap's planning items.</p>
+      <table class="bk-table" data-source="decisions" data-row-key="id">
+        <thead><tr><th data-field="id">Issue</th><th data-field="question">Question</th><th data-field="waitsOn">Waits on</th></tr></thead>
+        <tbody data-draw="decrows"></tbody>
+      </table>
+    </section>
+    <section class="bk-card" id="howto">
+      <h2>How the columns are worked out</h2>
+      <details class="bk-details">
+        <summary>Stages, code and test states</summary>
+        <dl>
+          <dt>Done</dt><dd>Ticked ✅ in the roadmap, closed on Codeberg, or a <span class="bk-mono">close #N</span> commit on main.</dd>
+          <dt>In progress</dt><dd>An unmerged branch or worktree names the issue, unpushed commits mention it, or the note says built.</dd>
+          <dt>Waiting, blocked</dt><dd>The note says waiting on someone, or decide with, after or depends on another issue.</dd>
+          <dt>Parked</dt><dd>The note says parked, deferred or rejected.</dd>
+          <dt>Code</dt><dd>branch, unpushed (on local main), pushed (on origin/main), or a dash for nothing in git.</dd>
+          <dt>Test</dt><dd>Required level from Risk: L needs T2, M and H need T3. Met when the recorded or inferred level reaches it; no test record when done without one.</dd>
+          <dt>Inferred</dt><dd>Read from the note (live-tested, live on hrossen, proven on lab2). Record a real result with backlog.py test.</dd>
+        </dl>
+      </details>
+    </section>
+  </div>
+</div>
+
+<script>
+  window.bk = { stage: null, group: '', q: '', sort: null, dir: 1 };
+  dash.calc('summary', {
+    title: 'Backlog totals', description: 'Counts of roadmap tasks by stage and test state.',
+    inputs: ['tasks', 'groups'],
+    fn: (tasks, groups) => [{
+      open: tasks.filter(t => t.stage !== 'Done').length,
+      streams: groups.filter(g => g.rows > 0 && g.rows > g.n_done).length,
+      todo: tasks.filter(t => t.stage === 'To do').length,
+      inprog: tasks.filter(t => t.stage === 'In progress').length,
+      blocked: tasks.filter(t => t.stage === 'Waiting' || t.stage === 'Blocked').length,
+      parked: tasks.filter(t => t.stage === 'Parked').length,
+      done: tasks.filter(t => t.stage === 'Done').length,
+      gaps: tasks.filter(t => ['no test record', 'below required', 'failing'].includes(t.testState)).length
+    }]
+  });
+  window.bkColor = (k) => {
+    const c = dash.colors;
+    return ({ 'Done': 'var(--color-ok)', 'In progress': c[0], 'Waiting': 'var(--color-warn)', 'Blocked': 'var(--color-warn)',
+      'To do': 'var(--cds-chart-muted)', 'Parked': 'var(--color-border-line)', 'gap': 'var(--color-bad)' })[k] || 'var(--cds-chart-muted)';
+  };
+  window.bkTestColor = (s) => ({ 'met': 'var(--color-ok)', 'passed': 'var(--color-ok)', 'no test record': 'var(--color-warn)',
+    'below required': 'var(--color-warn)', 'failing': 'var(--color-bad)' })[s] || 'transparent';
+  window.bkRedraw = () => { dash.draw('taskrows'); dash.draw('taskcount'); dash.draw('grouprows'); dash.draw('groupsel'); };
+  dash.onData(() => {
+    document.querySelectorAll('[data-dot]').forEach(d => { d.style.background = bkColor(d.dataset.dot); });
+  });
+
+  dash.draw('sum', (el) => {
+    const s = dash.data('summary');
+    el.textContent = s.status === 'ok' && s.data[0] ? String(s.data[0][el.dataset.field]) : '—';
+  });
+  dash.draw('meta', (el) => {
+    const m = dash.data('meta');
+    const r = m.status === 'ok' ? m.data[0] : null;
+    if (!r) { el.textContent = '—'; return; }
+    let v = r[el.dataset.field];
+    if (el.dataset.field === 'snapshotAt' || el.dataset.field === 'generated') v = String(v).slice(0, 16).replace('T', ' ');
+    el.textContent = String(v ?? '—');
+  });
+
+  dash.draw('grouprows', (tb) => {
+    const g = dash.data('groups');
+    tb.replaceChildren();
+    if (g.status !== 'ok') return;
+    const order = ['Done', 'In progress', 'Waiting', 'Blocked', 'To do', 'Parked'];
+    for (const r of g.data) {
+      if (!r.rows) continue;
+      const tr = document.createElement('tr');
+      tr.dataset.key = r.group;
+      if (bk.group === r.group) tr.classList.add('is-on');
+      const td = (txt, cls) => { const c = document.createElement('td'); if (cls) c.className = cls; c.textContent = txt; tr.append(c); return c; };
+      td(r.wave === 'FW' ? '–' : 'Wave ' + r.wave, 'bk-wave');
+      td(r.group, 'bk-gid');
+      td(r.name);
+      td(r.risk, 'bk-narrow-hide');
+      const cell = td('');
+      const bar = document.createElement('div'); bar.className = 'bk-bar';
+      const parts = [];
+      for (const s of order) {
+        const n = r['n_' + s.toLowerCase().replace(' ', '_')] || 0;
+        if (!n) continue;
+        const sp = document.createElement('span');
+        sp.style.width = (100 * n / r.rows) + '%';
+        sp.style.background = bkColor(s);
+        bar.append(sp);
+        parts.push(n + ' ' + s.toLowerCase());
+      }
+      const cap = document.createElement('div'); cap.className = 'bk-barcap'; cap.textContent = parts.join(' · ');
+      cell.append(bar, cap);
+      const gap = td(String(r.testGaps));
+      if (r.testGaps) gap.style.color = 'var(--color-warn)';
+      td(String(r.released), 'bk-narrow-hide');
+      tr.addEventListener('click', () => {
+        bk.group = bk.group === r.group ? '' : r.group;
+        bkRedraw();
+        if (bk.group) document.getElementById('tasks').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      tb.append(tr);
+    }
+  });
+
+  dash.draw('groupsel', (sel) => {
+    const g = dash.data('groups');
+    const rows = g.status === 'ok' ? g.data.filter(r => r.rows) : [];
+    sel.replaceChildren(new Option('All workstreams', ''), ...rows.map(r => new Option(r.group + ' ' + r.name, r.group)));
+    sel.value = bk.group;
+    sel.onchange = () => { bk.group = sel.value; bkRedraw(); };
+  });
+
+  window.bkFiltered = () => {
+    const t = dash.data('tasks');
+    if (t.status !== 'ok') return null;
+    const q = bk.q.trim().toLowerCase();
+    let rows = t.data.filter(r =>
+      (!bk.group || r.group === bk.group) &&
+      (!bk.stage || (bk.stage === 'gaps' ? ['no test record', 'below required', 'failing'].includes(r.testState)
+        : bk.stage.split('|').includes(r.stage))) &&
+      (!q || (r.id + ' ' + r.title + ' ' + r.note + ' ' + r.branch).toLowerCase().includes(q)));
+    if (bk.sort) {
+      const rank = { 'In progress': 0, 'Blocked': 1, 'Waiting': 2, 'To do': 3, 'Parked': 4, 'Done': 5, L: 0, M: 1, H: 2 };
+      const key = (r) => { const v = r[bk.sort]; return v in rank ? rank[v] : (v ?? ''); };
+      rows = rows.slice().sort((a, b) => { const x = key(a), y = key(b); return (x > y ? 1 : x < y ? -1 : 0) * bk.dir; });
+    }
+    return { rows, total: t.data.length };
+  };
+
+  dash.draw('taskcount', (el) => {
+    const f = bkFiltered();
+    el.textContent = f ? `${f.rows.length} of ${f.total} tasks` : '—';
+  });
+
+  dash.draw('taskrows', (tb) => {
+    const f = bkFiltered();
+    tb.replaceChildren();
+    if (!f) return;
+    for (const r of f.rows) {
+      const tr = document.createElement('tr');
+      tr.dataset.key = r.key;
+      const td = (cls) => { const c = document.createElement('td'); if (cls) c.className = cls; tr.append(c); return c; };
+      const idc = td('bk-gid');
+      if (r.num) {
+        const a = document.createElement('a');
+        a.href = 'https://codeberg.org/TAPPaaS/TAPPaaS/issues/' + r.num; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = r.id; idc.append(a);
+      } else idc.textContent = r.id;
+      const tc = td();
+      const t1 = document.createElement('div'); t1.className = 'bk-ttl'; t1.textContent = r.title;
+      tc.append(t1);
+      if (r.note) { const n = document.createElement('div'); n.className = 'bk-tnote'; n.textContent = r.note; tc.append(n); }
+      td('bk-narrow-hide').textContent = r.group;
+      td().textContent = r.risk;
+      const sc = td();
+      const pill = document.createElement('span'); pill.className = 'bk-pill';
+      const dot = document.createElement('span'); dot.className = 'bk-dot'; dot.style.background = bkColor(r.stage);
+      pill.append(dot, document.createTextNode(r.stage));
+      sc.append(pill);
+      if (r.stageNote) { const n = document.createElement('div'); n.className = 'bk-tnote'; n.textContent = r.stageNote; sc.append(n); }
+      const cc = td('bk-narrow-hide');
+      const c1 = document.createElement('div'); c1.textContent = r.code; cc.append(c1);
+      const sub = r.branch ? r.branch + (r.worktree ? ' (' + r.worktree + ')' : '') : (r.lastCommit ? r.lastCommit + ' ' + r.lastCommitDate : '');
+      if (sub) { const n = document.createElement('div'); n.className = 'bk-tnote bk-mono'; n.textContent = sub; cc.append(n); }
+      const ec = td();
+      const tp = document.createElement('span'); tp.className = 'bk-pill';
+      const td2 = document.createElement('span'); td2.className = 'bk-dot'; td2.style.background = bkTestColor(r.testState);
+      tp.append(td2, document.createTextNode(r.testState));
+      ec.append(tp);
+      const parts = [];
+      if (r.testLevel) parts.push(r.testLevel + ' ' + r.testResult + (r.testSite ? ' on ' + r.testSite : '') + (r.testSource === 'inferred' ? ', inferred' : '') + (r.testDate ? ', ' + r.testDate : ''));
+      if (r.testRequired) parts.push('needs ' + r.testRequired);
+      if (parts.length) { const n = document.createElement('div'); n.className = 'bk-tnote'; n.textContent = parts.join(' · '); ec.append(n); }
+      tb.append(tr);
+    }
+  });
+
+  dash.draw('decrows', (tb) => {
+    const d = dash.data('decisions');
+    tb.replaceChildren();
+    if (d.status !== 'ok') return;
+    for (const r of d.data) {
+      const tr = document.createElement('tr'); tr.dataset.key = r.id;
+      for (const k of ['id', 'question', 'waitsOn']) { const c = document.createElement('td'); c.textContent = r[k]; if (k === 'id') c.className = 'bk-gid'; tr.append(c); }
+      tb.append(tr);
+    }
+  });
+
+  document.querySelectorAll('.bk-tile').forEach(b => b.addEventListener('click', () => {
+    bk.stage = bk.stage === b.dataset.stage ? null : b.dataset.stage;
+    document.querySelectorAll('.bk-tile').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.stage === bk.stage)));
+    bkRedraw();
+  }));
+  document.querySelectorAll('#bk-q').forEach(i => i.addEventListener('input', () => { bk.q = i.value; dash.draw('taskrows'); dash.draw('taskcount'); }));
+  document.querySelectorAll('#bk-clear').forEach(b => b.addEventListener('click', () => {
+    bk.stage = null; bk.group = ''; bk.q = ''; bk.sort = null;
+    document.querySelectorAll('#bk-q').forEach(i => { i.value = ''; });
+    document.querySelectorAll('.bk-tile').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    document.querySelectorAll('.bk-tasks th').forEach(th => th.removeAttribute('aria-sort'));
+    bkRedraw();
+  }));
+  document.querySelectorAll('.bk-tasks th button').forEach(btn => btn.addEventListener('click', () => {
+    const k = btn.dataset.sort;
+    bk.dir = bk.sort === k ? -bk.dir : 1; bk.sort = k;
+    document.querySelectorAll('.bk-tasks th').forEach(th => th.removeAttribute('aria-sort'));
+    btn.parentElement.setAttribute('aria-sort', bk.dir > 0 ? 'ascending' : 'descending');
+    dash.draw('taskrows');
+  }));
+</script>

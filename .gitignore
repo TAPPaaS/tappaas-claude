@@ -14,3 +14,7 @@ outbox/
 
 # Test run logs from scripts/tappaas-test.sh
 logs/
+
+# Built dashboard data from scripts/backlog.py
+backlog/out/
+backlog/dashboard/page.json

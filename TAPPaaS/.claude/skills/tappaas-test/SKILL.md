@@ -28,6 +28,9 @@ Climb only as far as the change's upgrade risk needs (*Test effort needed based 
 | T4 | makerfloss | after the operator pushes to `main`: next scheduled sweep, `~/config/last-update-result.json` |
 | T5 | blank install | release candidates only (`release/README.md`) — operator-driven |
 
+**Record what an issue reached** (T1 and up), pass or fail, so the backlog dashboard shows it:
+`python3 ~/src/tappaas-claude/scripts/backlog.py test <N> <T1..T4> <pass|fail> --site hrossen --note "<one line>"`.
+
 ## The runner
 
 ```bash
