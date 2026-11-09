@@ -131,18 +131,21 @@ CLOSE_REF = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?) #(\d{2,4})\
 BRANCH_NUM = re.compile(r"(?:^|[/-])(\d{2,4})(?=[-/.]|$)")
 
 
+ROADMAP_ONLY = re.compile(r"^docs\(roadmap\)")  # bookkeeping, not work on the issue
+
+
 def git_state(repo):
     main, upstream = "refs/heads/main", "refs/remotes/origin/main"
     st = {"unpushed": {}, "landed": {}, "closedBy": {}, "branches": {}, "worktrees": {}}
     for rec in git(repo, "log", f"{upstream}..{main}", "--format=%h%x1f%s%x1f%b%x1e").split("\x1e"):
         p = rec.strip().split("\x1f")
-        if len(p) < 2:
+        if len(p) < 2 or ROADMAP_ONLY.match(p[1]):
             continue
         for n in set(ISSUE_REF.findall(p[1] + " " + (p[2] if len(p) > 2 else ""))):
             st["unpushed"].setdefault(int(n), []).append(p[0])
     for rec in git(repo, "log", main, "--since=120.days", "--format=%h%x1f%cs%x1f%s%x1f%b%x1e").split("\x1e"):
         p = rec.strip().split("\x1f")
-        if len(p) < 3:
+        if len(p) < 3 or ROADMAP_ONLY.match(p[2]):
             continue
         msg = p[2] + " " + (p[3] if len(p) > 3 else "")
         for n in set(ISSUE_REF.findall(msg)):
@@ -164,6 +167,8 @@ def git_state(repo):
                    "--format=%S%x1f%s%x1f%b%x1e").split("\x1e"):
         p = rec.strip().split("\x1f")
         if len(p) < 2:
+            continue
+        if ROADMAP_ONLY.match(p[1]):
             continue
         b = p[0].removeprefix("refs/heads/")
         unmerged.setdefault(b, set()).update(int(n) for n in ISSUE_REF.findall(p[1] + " " + (p[2] if len(p) > 2 else "")))
