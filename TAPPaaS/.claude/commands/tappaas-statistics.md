@@ -1,121 +1,39 @@
-Generate code and documentation statistics for `src/` and write/update `src/STATISTICS.md`.
+Regenerate `src/STATISTICS.md`: the source statistics of the current revision against the last release, so the file shows the release delta.
+
+Arguments (optional): `$ARGUMENTS` — the label of the current revision (the version the next boundary cuts, e.g. `2.5`). Default: ask what the next version is from `ROADMAP.md` ("done for X.Y").
 
 ## Steps
 
-### 1. Count lines in `src/foundation/`
+### 1. Pick the two sides
 
-Run the following shell commands to count non-blank lines by file type under `src/foundation/` (excluding `src/foundation/Attic/`):
+- **Last release:** the newest release tag, `git describe --tags --abbrev=0 --match 'v[0-9]*' origin/staging` (e.g. `v2.4`). Its label is the version without the `v`.
+- **Current:** `origin/main` after `git fetch origin` — what the next boundary releases. Its label is the next version (the argument, or from `ROADMAP.md`).
 
-```bash
-# Bash (.sh)
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.sh" -print | xargs wc -l 2>/dev/null | tail -1
+When the user names other refs or labels, use those.
 
-# Python (.py)
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.py" -print | xargs wc -l 2>/dev/null | tail -1
+### 2. Generate
 
-# NixOS (.nix)
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.nix" -print | xargs wc -l 2>/dev/null | tail -1
-
-# Documentation (.md)
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.md" -print | xargs wc -l 2>/dev/null | tail -1
-
-# Also count number of files (not lines) for each type
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.sh" -print | grep -c "\.sh$"
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.py" -print | grep -c "\.py$"
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.nix" -print | grep -c "\.nix$"
-find src/foundation/ -path "*/Attic/*" -prune -o -name "*.md" -print | grep -c "\.md$"
-```
-
-### 2. Count lines in the stack directories
-
-Every module outside foundation lives in its stack's directory, `src/<stack>/` (#421). Run the same
-commands over all of them, excluding `src/misc/00-Template/`:
+From the repository root:
 
 ```bash
-STACKS=$(find src -mindepth 1 -maxdepth 1 -type d ! -name foundation)
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.sh" -print | xargs wc -l 2>/dev/null | tail -1
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.py" -print | xargs wc -l 2>/dev/null | tail -1
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.nix" -print | xargs wc -l 2>/dev/null | tail -1
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.md" -print | xargs wc -l 2>/dev/null | tail -1
-
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.sh" -print | grep -c "\.sh$"
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.py" -print | grep -c "\.py$"
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.nix" -print | grep -c "\.nix$"
-find $STACKS -path "*/00-Template/*" -prune -o -name "*.md" -print | grep -c "\.md$"
+python3 src/generate-statistics.py --last v2.4 --last-label 2.4 --current origin/main --current-label 2.5 > src/STATISTICS.md
 ```
 
-### 3. Count installed apps
+The script counts both sides from git by the same rules (no checkout), so it is safe in a dirty tree; it never edits anything but its output. Read its docstring for what it counts and excludes. Do not hand-edit the result; change the script instead, so the next run says the same.
 
-Count the non-template modules in the stack directories (one directory per module, excluding `00-Template`):
+### 3. Check it
+
+- The two totals are plausible (a release changes thousands of lines, not hundreds of thousands, unless something big landed or a generated file slipped in).
+- A large jump in one row (the "Δ lines" column) has a reason: a new module, a new manager, the console. If it is generated output or a fixture that should not count, add it to `EXCLUDE` in the script, commit that, and regenerate.
+
+### 4. Commit
+
+On `main`, by pathspec (other sessions may have staged work):
 
 ```bash
-find $(find src -mindepth 1 -maxdepth 1 -type d ! -name foundation) -mindepth 1 -maxdepth 1 -type d ! -name "00-Template" | wc -l
+git commit -m "docs(stats): source statistics, 2.5 against 2.4" -- src/STATISTICS.md
 ```
 
-### 4. Count foundation modules and scripts
+### 5. Report
 
-```bash
-# Foundation subdirectories (modules)
-find src/foundation/ -mindepth 1 -maxdepth 1 -type d | wc -l
-
-# Total scripts installed to /home/tappaas/bin (from PROGRAMS.csv as reference)
-grep -c "^[^#]" src/foundation/PROGRAMS.csv
-```
-
-### 5. Compute totals
-
-For each area, sum the line counts across all types to get a total lines figure.
-Grand total = foundation total + apps total.
-
-### 6. Write `src/STATISTICS.md`
-
-Read `src/STATISTICS.md` first (if it exists), then write the complete updated file.
-
-The file must contain:
-
-```markdown
-# TAPPaaS Source Statistics
-
-Generated: <today's date>
-
-## Foundation (`src/foundation/`)
-
-> Excludes `Attic/` (archived code).
-
-| File Type       | Files | Lines |
-|-----------------|------:|------:|
-| Bash (.sh)      |     N |     N |
-| Python (.py)    |     N |     N |
-| NixOS (.nix)    |     N |     N |
-| Documentation (.md) | N |     N |
-| **Total**       | **N** | **N** |
-
-## Stack modules (`src/<stack>/`)
-
-> Excludes `00-Template/` (template scaffolding). Covers N installed app modules.
-
-| File Type       | Files | Lines |
-|-----------------|------:|------:|
-| Bash (.sh)      |     N |     N |
-| Python (.py)    |     N |     N |
-| NixOS (.nix)    |     N |     N |
-| Documentation (.md) | N |     N |
-| **Total**       | **N** | **N** |
-
-## Grand Total
-
-| Area            | Files | Lines |
-|-----------------|------:|------:|
-| Foundation      |     N |     N |
-| Apps            |     N |     N |
-| **Total**       | **N** | **N** |
-```
-
-Replace all `N` placeholders with the actual counts gathered in steps 1–5.
-
-### 7. Report
-
-Tell the user:
-- The path to the written file
-- The grand total line count
-- How many app modules are covered
+Tell the user the path, the two totals, the delta, and the three rows that grew most.
