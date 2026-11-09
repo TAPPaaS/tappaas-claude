@@ -1,39 +1,32 @@
-Regenerate the dependency documentation for src/foundation/:
+Regenerate the foundation's program and dependency documentation: `src/foundation/PROGRAMS.csv`, `DEPENDENCIES.csv` and `DEPENDENCIES.md`.
 
-1. **Analyze all files** in src/foundation/ including:
-   - Shell scripts (.sh)
-   - Python files (.py)
-   - configuration.json and zones.json
-   - PHP files (.php)
-   - pyproject.toml files
+## Steps
 
-2. **list executable programs/scripts, identify where the installed programs exists**:
-   - Most programs will be installed in /home/tappaas/bin under tappaas-cicd
-   - exception is Create-TAPPAaS-VM.sh installed in the root account of every TAPPaaS node
-   - create a file that lists all the executable: PRPGRAMS.csv
-   - for each program list what are the source files for the program (for scripts it is the script itself, but identify location of the source)
+### 1. Generate
 
-2. **For each program/script, identify direct dependencies**:
-   - Shell scripts: `source`, `.` commands, script calls
-   - Programs based on Python files: list other TAPPaaS programs/scripts it calls
-   - also list if the program/script is dependent on configuration.json or zones.json
+From the repository root:
 
-3. **Create DEPENDENCIES.csv** with columns:
-   - File name
-   - Location (relative path)
-   - Direct dependencies (semicolon-separated list)
-   - Group files by directory with comment headers
+```bash
+python3 src/foundation/generate-dependencies.py          # writes the three files
+python3 src/foundation/generate-dependencies.py --check  # only says whether they are stale
+```
 
-4. **Create DEPENDENCIES.md** with:
-   - Summary table of directories and file counts
-   - Key dependency chains (5 main flows)
-   - Most connected files table
-   - Top-level entry points (programs nothing depends on)
-   - mermaid dependency graph for each top level entry
+The script reads the code, never a site. Programs come from what the installers link into `~/bin` (`tappaas-cicd/install.sh`, `components.json`, each component's `install.sh`, `package.json` bins, `pyproject.toml` scripts); dependencies are the files sourced, the programs named in the code and the config files named. Its docstring has the exact rules. Do not hand-edit the output; change the script and run it again.
 
-5. **Mermaid syntax notes**:
-   - Escape `@` symbols using `#64;` and wrap in quotes: `["user#64;host"]`
-   - Use quotes for labels with special characters
-   - Keep node IDs simple (single letters or short names)
+### 2. Check it
 
-Output all three files to src/foundation/.
+- `git diff --stat` on the three files: a new or vanished program has a reason (a component added, a verb retired).
+- If a program a site has in `~/bin` is missing, an installer links it in a way the script does not know yet: add that pattern to `programs()` and rerun. A file placed by hand on one site (not in any installer) is not a program.
+- A dependency that is only a word in a message (a false match) is fixed in the script's matching, not in the CSV.
+
+### 3. Commit
+
+On `main`, by pathspec:
+
+```bash
+git commit -m "docs(foundation): regenerate programs and dependencies" -- src/foundation/PROGRAMS.csv src/foundation/DEPENDENCIES.csv src/foundation/DEPENDENCIES.md
+```
+
+### 4. Report
+
+The program count, the files read, and what changed since the last run.
