@@ -80,7 +80,7 @@ if [ -z "\${TAPPAAS_DEVENV:-}" ]; then
     # macOS TMPDIR is /var/folders/... and /var -> /private/var; bash's \$PWD
     # resolves it, os.tmpdir() does not, so tests comparing the two fail here
     # and pass on Linux. Hand everything the resolved path, as on a mothership.
-    TMPDIR="\$(/bin/realpath "\${TMPDIR:-/tmp}")/"; export TMPDIR
+    TMPDIR="\$(/bin/realpath "\${TMPDIR:-/tmp}")"; export TMPDIR   # no trailing slash: "\${TMPDIR}/x" must equal the real path
     # An empty LANG/LC_ALL (the Claude app's shells) makes postgres refuse to
     # start on macOS ("postmaster became multithreaded"). C.UTF-8 keeps C's
     # byte-order collation and adds UTF-8.
